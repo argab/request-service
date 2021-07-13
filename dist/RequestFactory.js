@@ -124,10 +124,10 @@ var RequestFactory = /*#__PURE__*/function () {
     value: function resolveClientOnResponse(response, request) {
       var handlers = this.getHandlers(request.data);
       this.resolveHandlers(response, handlers, 'after');
-      var isSuccess = this.resolveHandlers(response, handlers, 'isSuccess');
-      var isError = this.resolveHandlers(response, handlers, 'isError');
+      var isSuccess = this.resolveHandlers(_objectSpread({}, response), handlers, 'isSuccess');
+      var isError = this.resolveHandlers(_objectSpread({}, response), handlers, 'isError');
 
-      if (isSuccess === true || isSuccess === undefined && !isError) {
+      if (isSuccess === true || isSuccess !== true && isError !== true) {
         request.data.success instanceof Function ? request.data.success(response) : this.resolveHandlers(response, handlers, 'onSuccess');
       } else if (isError === true) {
         request.data.error instanceof Function ? request.data.error(response) : this.resolveHandlers(response, handlers, 'onError');
