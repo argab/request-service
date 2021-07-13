@@ -1,0 +1,33 @@
+{
+  "name": "@argab/request-service",
+  "version": "1.0.0",
+  "description": "Provides a fully customizable Library for handling API using Request repositories and Stubs.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://argab@bitbucket.org/argab/request-service.git"
+  },
+  "keywords": [
+    "Request Service",
+    "API Client",
+    "Request repository",
+    "Request Stub"
+  ],
+  "author": "ArGab<argab.dev@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://bitbucket.org/argab/request-service/issues"
+  },
+  "homepage": "https://bitbucket.org/argab/request-service#readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "tests",
+    "build": "babel src -d dist"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.6",
+    "@babel/plugin-transform-runtime": "^7.14.5",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/runtime": "^7.14.6"
+  }
+}
