@@ -94,7 +94,7 @@ class RequestFactory {
         const isSuccess = this.resolveHandlers({...response}, handlers, 'isSuccess')
         const isError = this.resolveHandlers({...response}, handlers, 'isError')
 
-        if (isSuccess === true || (isSuccess === undefined && !isError)) {
+        if (isSuccess === true || (isSuccess !== true && isError !== true)) {
 
             request.data.success instanceof Function
                 ? request.data.success(response)
