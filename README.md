@@ -155,8 +155,8 @@ MyApp.prototype.request = new Request({
   },
   useStubs: true, 
   config: {
-      client: new ApiClient(),
-      handler: new ApiHandler()
+      client: ApiClient,
+      handler: ApiHandler
   }
 })
 
