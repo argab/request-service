@@ -35,6 +35,13 @@ var RequestMediator = /*#__PURE__*/function () {
     value: function config(data) {
       data instanceof Object && Object.assign(this.staged, data);
     }
+  }, {
+    key: "stubData",
+    value: function stubData(_stubData) {
+      this.config({
+        stubData: _stubData
+      });
+    }
   }]);
   return RequestMediator;
 }();

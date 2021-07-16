@@ -81,8 +81,8 @@ import ApiHandler from './src/api/ApiHandler'
 
 MyApp.prototype.request = new Request({
   config: {
-      client: new ApiClient(),
-      handler: new ApiHandler()
+      client: ApiClient,
+      handler: ApiHandler
   }
 })
 
@@ -95,11 +95,15 @@ new MyApp()
 
 ```javascript
 
+import ApiHandler from './src/api/ApiHandler'
+import SomeHandler from './src/api/SomeHandler'
+import SomeClient from './src/api/SomeClient'
+
 this.request
     // configurating (optional):
     .config({ 
-        handler: [new SomeHandler(), new ApiHandler()],
-        client: new SomeClient(),
+        handler: [SomeHandler, ApiHandler],
+        client: SomeClient,
         headers: {'Content-Type': 'application/json;charset=UTF-8'}
     })
     
@@ -119,6 +123,10 @@ this.request
     .error(response => {}) // If not called, then ApiHandler`s "onError" will be executed.
     .catch(error => {}) // If not called, then ApiHandler`s "onCatch" will be executed.
     .finally(requestData => {}) // If not called, then ApiHandler`s "onFinally" will be executed.
+
+    // get a new Promise.prototype;
+    // as a result we get the request`s statusCode here
+    .await()
 
 ```
 
@@ -164,11 +172,22 @@ export default class extends RequestRepository {
     }
 }
 
+//........... /api/_stubs/orders.js
+
+import {RequestRepository} from '@argab/request-service'
+
+export default class extends RequestRepository {
+    getOrders(params) {
+        return this.client.stubData({SOME_STUB_DATA}).get('/orders', params)
+    }
+}
+
 //.......... getOrders.js
+
+// if "useStubs" set to true, then stubs reposiory will be connected first (only if exists).
 
 this.request.repo('orders').getOrders({params}).then(...).error(...)
 
-// if "useStubs" set to true, then stubs reposiory will be connected first (only if exists).
 // Anyway, calling .stub() obviously will connect the stubs reposiory even if "useStubs" set to false.
 
 this.request.stub('orders').getOrders({params}).then(...).error(...)

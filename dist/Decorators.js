@@ -134,10 +134,10 @@ var ClientDecorator = /*#__PURE__*/function () {
 exports.ClientDecorator = ClientDecorator;
 
 var RequestDecorator = /*#__PURE__*/function () {
-  function RequestDecorator(request) {
+  function RequestDecorator(data) {
     (0, _classCallCheck2["default"])(this, RequestDecorator);
     (0, _defineProperty2["default"])(this, "data", {});
-    this.data = request;
+    this.data = data;
   }
 
   (0, _createClass2["default"])(RequestDecorator, [{
@@ -181,6 +181,25 @@ var RequestDecorator = /*#__PURE__*/function () {
     value: function alert(messageOnError) {
       this.data.alert = messageOnError;
       return this;
+    }
+    /*
+    * This method should be called at the end as it returns a new Promise with the request status code.
+    * @return: Number request`s statusCode
+    * */
+
+  }, {
+    key: "await",
+    value: function _await() {
+      var _this = this;
+
+      return new Promise(function (resolve) {
+        var interval = setInterval(function () {
+          if (_this.data.statusCode) {
+            resolve(_this.data.statusCode);
+            clearInterval(interval);
+          }
+        }, 1000);
+      });
     }
   }]);
   return RequestDecorator;

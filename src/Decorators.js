@@ -21,8 +21,8 @@ class RequestDecorator {
 
     data = {}
 
-    constructor(request) {
-        this.data = request
+    constructor(data) {
+        this.data = data
     }
 
     success(callback) {
@@ -58,6 +58,21 @@ class RequestDecorator {
     alert(messageOnError) {
         this.data.alert = messageOnError
         return this
+    }
+
+    /*
+    * This method should be called at the end as it returns a new Promise with the request status code.
+    * @return: Number request`s statusCode
+    * */
+    await() {
+        return new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (this.data.statusCode) {
+                    resolve(this.data.statusCode)
+                    clearInterval(interval)
+                }
+            }, 1000)
+        })
     }
 
 }

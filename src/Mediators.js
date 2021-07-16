@@ -10,6 +10,10 @@ class RequestMediator {
         data instanceof Object && Object.assign(this.staged, data)
     }
 
+    stubData(stubData) {
+        this.config({stubData})
+    }
+
 }
 
 class RequestMediatorDecorator extends RequestMediator {

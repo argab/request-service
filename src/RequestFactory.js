@@ -1,6 +1,5 @@
 import {ClientDecorator, RequestDecorator} from "./Decorators"
 import {RequestHandler} from "./Interfaces"
-import {Request} from "./Request"
 
 class RequestFactory {
 
@@ -9,11 +8,9 @@ class RequestFactory {
     _request
 
     constructor({client, handler, requestDecorator}) {
-        this._handler = handler instanceof RequestHandler ? handler : RequestHandler
-        this._client = client instanceof ClientDecorator ? client : ClientDecorator
-        this._request = requestDecorator instanceof RequestDecorator ? requestDecorator : RequestDecorator
-
-        this._request = Request._setPrototypeOf(this._request, requestDecorator)
+        this._handler = RequestHandler.prototype.isPrototypeOf(handler) ? handler : RequestHandler
+        this._client = ClientDecorator.prototype.isPrototypeOf(client) ? client : ClientDecorator
+        this._request = RequestDecorator.prototype.isPrototypeOf(requestDecorator) ? requestDecorator : RequestDecorator
     }
 
     create({method, uri, params, config}) {
@@ -25,7 +22,6 @@ class RequestFactory {
         if (false === (request instanceof RequestDecorator)) {
             return
         }
-
         const client = this.getClient(request.data)
         client[request.data.method] instanceof Function && this.resolveClient(client, request)
 
@@ -33,21 +29,17 @@ class RequestFactory {
     }
 
     getClient(data) {
-        let client = data.client instanceof ClientDecorator ? data.client : this._client
-        client = Request._setPrototypeOf(client, data.client)
+        const client = ClientDecorator.isPrototypeOf(data.client) ? data.client : this._client
         return new client(data)
     }
 
     getHandlers(data) {
-
         const output = []
         let handlers = data.handler || this._handler
         Array.isArray(handlers) || (handlers = [handlers])
 
-        handlers.forEach(hr => {
-            let handler = hr instanceof RequestHandler ? hr : this._handler
-            handler = Request._setPrototypeOf(handler, hr)
-            output.push(new handler(data))
+        handlers.forEach(handler => {
+            (RequestHandler.isPrototypeOf(handler) || RequestHandler.prototype === handler.prototype) && output.push(new handler(data))
         })
 
         return output
@@ -72,15 +64,18 @@ class RequestFactory {
         const handlers = this.getHandlers(request.data)
         request.data = this.resolveHandlers(request.data, handlers, 'before')
 
-        const dataClient = client[request.data.method](request.data)
+        const dataClient = request.data.stubData || client[request.data.method](request.data)
         const promise = dataClient instanceof Promise
             ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
 
         promise.then(response => {
+            request.data.statusCode || (request.data.statusCode = 200)
             return this.resolveClientOnResponse(response, request)
         }).catch(error => {
+            request.data.statusCode || (request.data.statusCode = 500)
             return this.resolveClientOnCatch(error, request)
         }).finally(() => {
+            request.data.statusCode || (request.data.statusCode = 200)
             return this.resolveClientOnFinally(request)
         })
 
@@ -117,7 +112,7 @@ class RequestFactory {
         if (request.data.catch instanceof Function) {
             try {
                 request.data.catch(error)
-            } catch(err) {
+            } catch (err) {
                 this.resolveHandlers(err, handlers, 'onCatch')
             }
         } else {
@@ -134,7 +129,7 @@ class RequestFactory {
         if (request.data.finally instanceof Function) {
             try {
                 request.data.finally(request.data)
-            } catch(err) {
+            } catch (err) {
                 this.resolveHandlers(err, handlers, 'onCatch')
             }
         } else {

@@ -17,8 +17,6 @@ var _Decorators = require("./Decorators");
 
 var _Interfaces = require("./Interfaces");
 
-var _Request = require("./Request");
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -32,10 +30,9 @@ var RequestFactory = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_handler", void 0);
     (0, _defineProperty2["default"])(this, "_client", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
-    this._handler = handler instanceof _Interfaces.RequestHandler ? handler : _Interfaces.RequestHandler;
-    this._client = client instanceof _Decorators.ClientDecorator ? client : _Decorators.ClientDecorator;
-    this._request = requestDecorator instanceof _Decorators.RequestDecorator ? requestDecorator : _Decorators.RequestDecorator;
-    this._request = _Request.Request._setPrototypeOf(this._request, requestDecorator);
+    this._handler = _Interfaces.RequestHandler.prototype.isPrototypeOf(handler) ? handler : _Interfaces.RequestHandler;
+    this._client = _Decorators.ClientDecorator.prototype.isPrototypeOf(client) ? client : _Decorators.ClientDecorator;
+    this._request = _Decorators.RequestDecorator.prototype.isPrototypeOf(requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
   }
 
   (0, _createClass2["default"])(RequestFactory, [{
@@ -66,22 +63,17 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "getClient",
     value: function getClient(data) {
-      var client = data.client instanceof _Decorators.ClientDecorator ? data.client : this._client;
-      client = _Request.Request._setPrototypeOf(client, data.client);
+      var client = _Decorators.ClientDecorator.isPrototypeOf(data.client) ? data.client : this._client;
       return new client(data);
     }
   }, {
     key: "getHandlers",
     value: function getHandlers(data) {
-      var _this = this;
-
       var output = [];
       var handlers = data.handler || this._handler;
       Array.isArray(handlers) || (handlers = [handlers]);
-      handlers.forEach(function (hr) {
-        var handler = hr instanceof _Interfaces.RequestHandler ? hr : _this._handler;
-        handler = _Request.Request._setPrototypeOf(handler, hr);
-        output.push(new handler(data));
+      handlers.forEach(function (handler) {
+        (_Interfaces.RequestHandler.isPrototypeOf(handler) || _Interfaces.RequestHandler.prototype === handler.prototype) && output.push(new handler(data));
       });
       return output;
     }
@@ -101,22 +93,25 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "resolveClient",
     value: function resolveClient(client, request) {
-      var _this2 = this;
+      var _this = this;
 
       var handlers = this.getHandlers(request.data);
       request.data = this.resolveHandlers(request.data, handlers, 'before');
-      var dataClient = client[request.data.method](request.data);
+      var dataClient = request.data.stubData || client[request.data.method](request.data);
       var promise = dataClient instanceof Promise ? dataClient : new Promise(function (res) {
         return setTimeout(function () {
           return res(dataClient);
         }, 100);
       });
       promise.then(function (response) {
-        return _this2.resolveClientOnResponse(response, request);
+        request.data.statusCode || (request.data.statusCode = 200);
+        return _this.resolveClientOnResponse(response, request);
       })["catch"](function (error) {
-        return _this2.resolveClientOnCatch(error, request);
+        request.data.statusCode || (request.data.statusCode = 500);
+        return _this.resolveClientOnCatch(error, request);
       })["finally"](function () {
-        return _this2.resolveClientOnFinally(request);
+        request.data.statusCode || (request.data.statusCode = 200);
+        return _this.resolveClientOnFinally(request);
       });
     }
   }, {

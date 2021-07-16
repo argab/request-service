@@ -33,6 +33,12 @@ Object.defineProperty(exports, "Request", {
     return _Request.Request;
   }
 });
+Object.defineProperty(exports, "AbstractRequest", {
+  enumerable: true,
+  get: function get() {
+    return _Request.AbstractRequest;
+  }
+});
 Object.defineProperty(exports, "RequestFactory", {
   enumerable: true,
   get: function get() {
