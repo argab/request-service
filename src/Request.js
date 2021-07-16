@@ -66,9 +66,9 @@ class Request extends AbstractRequest {
 
                     const repo = (path) => {
                         if (Req._useStubs) {
-                            const stub = stub(path)
-                            if (stub) {
-                                return stub
+                            const _stub = stub(path)
+                            if (_stub) {
+                                return _stub
                             }
                         }
                         const repo = Req._getRepo(path)

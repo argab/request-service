@@ -73,7 +73,7 @@ App.prototype.request = new Request({
         return new PostsStub()
     },
 
-    useStubs: false,
+    useStubs: true,
     config: {
         client: Client,
         handler: Handler,

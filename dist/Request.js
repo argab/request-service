@@ -119,7 +119,7 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
 
             var repo = function repo(path) {
               if (Req._useStubs) {
-                var _stub = _stub(path);
+                var _stub = stub(path);
 
                 if (_stub) {
                   return _stub;
