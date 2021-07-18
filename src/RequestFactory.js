@@ -1,16 +1,19 @@
 import {ClientDecorator, RequestDecorator} from "./Decorators"
-import {RequestHandler} from "./Interfaces"
+import {RequestHandler, RequestLoader} from "./Interfaces"
+import {AbstractRequest} from "./Request"
 
 class RequestFactory {
 
     _handler
     _client
     _request
+    _requestService
 
-    constructor({client, handler, requestDecorator}) {
-        this._handler = RequestHandler.prototype.isPrototypeOf(handler) ? handler : RequestHandler
-        this._client = ClientDecorator.prototype.isPrototypeOf(client) ? client : ClientDecorator
-        this._request = RequestDecorator.prototype.isPrototypeOf(requestDecorator) ? requestDecorator : RequestDecorator
+    constructor({client, handler, requestDecorator, requestService}) {
+        this._handler = RequestHandler.isPrototypeOf(handler) ? handler : RequestHandler
+        this._client = ClientDecorator.isPrototypeOf(client) ? client : ClientDecorator
+        this._request = RequestDecorator.isPrototypeOf(requestDecorator) ? requestDecorator : RequestDecorator
+        AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService)) && (this._requestService = requestService)
     }
 
     create({method, uri, params, config}) {
@@ -68,15 +71,25 @@ class RequestFactory {
         const promise = dataClient instanceof Promise
             ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
 
+        const getLoader = () => {
+            const loader = (request.data.useLoader
+                && (RequestLoader.isPrototypeOf(request.data.loader) || RequestLoader.prototype === request.data.loader.prototype))
+                ? new request.data.loader(request.data) : null
+            loader && (loader.pending = this._requestService?._requests.filter(r => r.data.useLoader && !r.data.statusCode).length)
+            return loader
+        }
+        getLoader()?.start()
+
         promise.then(response => {
+            this.resolveClientOnResponse(response, request)
             request.data.statusCode || (request.data.statusCode = 200)
-            return this.resolveClientOnResponse(response, request)
         }).catch(error => {
+            this.resolveClientOnCatch(error, request)
             request.data.statusCode || (request.data.statusCode = 500)
-            return this.resolveClientOnCatch(error, request)
         }).finally(() => {
+            this.resolveClientOnFinally(request)
             request.data.statusCode || (request.data.statusCode = 200)
-            return this.resolveClientOnFinally(request)
+            getLoader()?.end()
         })
 
     }

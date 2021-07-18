@@ -46,6 +46,10 @@ class RequestMediatorDecorator extends RequestMediator {
         this.config({useLoader: Boolean(useLoader)})
     }
 
+    bg() {
+        this.config({useLoader: false})
+    }
+
 }
 
 export {RequestMediator, RequestMediatorDecorator}

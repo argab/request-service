@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RequestRepository = exports.RequestHandler = void 0;
+exports.RequestLoader = exports.RequestRepository = exports.RequestHandler = void 0;
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
@@ -19,6 +19,24 @@ var RequestRepository = function RequestRepository() {
 };
 
 exports.RequestRepository = RequestRepository;
+
+var RequestLoader = /*#__PURE__*/function () {
+  function RequestLoader() {
+    (0, _classCallCheck2["default"])(this, RequestLoader);
+    (0, _defineProperty2["default"])(this, "pending", void 0);
+  }
+
+  (0, _createClass2["default"])(RequestLoader, [{
+    key: "start",
+    value: function start() {}
+  }, {
+    key: "end",
+    value: function end() {}
+  }]);
+  return RequestLoader;
+}();
+
+exports.RequestLoader = RequestLoader;
 
 var RequestHandler = /*#__PURE__*/function () {
   function RequestHandler() {

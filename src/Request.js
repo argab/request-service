@@ -15,6 +15,8 @@ class AbstractRequest {
     _config = {
         handler: null,
         client: null,
+        loader: null,
+        useLoader: false,
         stubData: null,
         headers: {'Content-Type': 'application/json;charset=UTF-8'},
         uri: '',
@@ -26,8 +28,7 @@ class AbstractRequest {
         finally: null,
         catch: null,
         done: null,
-        alert: null,
-        useLoader: false
+        alert: null
     }
 
     repo() {
@@ -93,6 +94,8 @@ class Request extends AbstractRequest {
                         return Req._proxy(mediator.staged)
                     }
 
+                    stagedData.requestService || Object.assign(stagedData, {requestService: Req})
+
                     const factory = new Req._factory(stagedData)
 
                     if (factory instanceof RequestFactory && factory._client.prototype[method] instanceof Function) {
@@ -108,6 +111,7 @@ class Request extends AbstractRequest {
                         })
 
                         Req._requests.push(request)
+
                         return factory.dispatch(request)
                     }
                 }

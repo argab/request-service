@@ -110,6 +110,13 @@ var RequestMediatorDecorator = /*#__PURE__*/function (_RequestMediator) {
         useLoader: Boolean(_useLoader)
       });
     }
+  }, {
+    key: "bg",
+    value: function bg() {
+      this.config({
+        useLoader: false
+      });
+    }
   }]);
   return RequestMediatorDecorator;
 }(RequestMediator);

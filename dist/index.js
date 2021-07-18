@@ -27,6 +27,12 @@ Object.defineProperty(exports, "RequestRepository", {
     return _Interfaces.RequestRepository;
   }
 });
+Object.defineProperty(exports, "RequestLoader", {
+  enumerable: true,
+  get: function get() {
+    return _Interfaces.RequestLoader;
+  }
+});
 Object.defineProperty(exports, "Request", {
   enumerable: true,
   get: function get() {

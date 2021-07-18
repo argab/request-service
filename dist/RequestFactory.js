@@ -17,6 +17,8 @@ var _Decorators = require("./Decorators");
 
 var _Interfaces = require("./Interfaces");
 
+var _Request = require("./Request");
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -25,14 +27,17 @@ var RequestFactory = /*#__PURE__*/function () {
   function RequestFactory(_ref) {
     var client = _ref.client,
         handler = _ref.handler,
-        requestDecorator = _ref.requestDecorator;
+        requestDecorator = _ref.requestDecorator,
+        requestService = _ref.requestService;
     (0, _classCallCheck2["default"])(this, RequestFactory);
     (0, _defineProperty2["default"])(this, "_handler", void 0);
     (0, _defineProperty2["default"])(this, "_client", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
-    this._handler = _Interfaces.RequestHandler.prototype.isPrototypeOf(handler) ? handler : _Interfaces.RequestHandler;
-    this._client = _Decorators.ClientDecorator.prototype.isPrototypeOf(client) ? client : _Decorators.ClientDecorator;
-    this._request = _Decorators.RequestDecorator.prototype.isPrototypeOf(requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
+    (0, _defineProperty2["default"])(this, "_requestService", void 0);
+    this._handler = _Interfaces.RequestHandler.isPrototypeOf(handler) ? handler : _Interfaces.RequestHandler;
+    this._client = _Decorators.ClientDecorator.isPrototypeOf(client) ? client : _Decorators.ClientDecorator;
+    this._request = _Decorators.RequestDecorator.isPrototypeOf(requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
+    _Request.AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService)) && (this._requestService = requestService);
   }
 
   (0, _createClass2["default"])(RequestFactory, [{
@@ -93,7 +98,8 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "resolveClient",
     value: function resolveClient(client, request) {
-      var _this = this;
+      var _this = this,
+          _getLoader;
 
       var handlers = this.getHandlers(request.data);
       request.data = this.resolveHandlers(request.data, handlers, 'before');
@@ -103,15 +109,33 @@ var RequestFactory = /*#__PURE__*/function () {
           return res(dataClient);
         }, 100);
       });
+
+      var getLoader = function getLoader() {
+        var _this$_requestService;
+
+        var loader = request.data.useLoader && (_Interfaces.RequestLoader.isPrototypeOf(request.data.loader) || _Interfaces.RequestLoader.prototype === request.data.loader.prototype) ? new request.data.loader(request.data) : null;
+        loader && (loader.pending = (_this$_requestService = _this._requestService) === null || _this$_requestService === void 0 ? void 0 : _this$_requestService._requests.filter(function (r) {
+          return r.data.useLoader && !r.data.statusCode;
+        }).length);
+        return loader;
+      };
+
+      (_getLoader = getLoader()) === null || _getLoader === void 0 ? void 0 : _getLoader.start();
       promise.then(function (response) {
+        _this.resolveClientOnResponse(response, request);
+
         request.data.statusCode || (request.data.statusCode = 200);
-        return _this.resolveClientOnResponse(response, request);
       })["catch"](function (error) {
+        _this.resolveClientOnCatch(error, request);
+
         request.data.statusCode || (request.data.statusCode = 500);
-        return _this.resolveClientOnCatch(error, request);
       })["finally"](function () {
+        var _getLoader2;
+
+        _this.resolveClientOnFinally(request);
+
         request.data.statusCode || (request.data.statusCode = 200);
-        return _this.resolveClientOnFinally(request);
+        (_getLoader2 = getLoader()) === null || _getLoader2 === void 0 ? void 0 : _getLoader2.end();
       });
     }
   }, {

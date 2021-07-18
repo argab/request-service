@@ -108,7 +108,6 @@ this.request
     })
     
     // mediators (optional):
-    .useLoader()
     .headers({'Content-Type': 'application/json;charset=UTF-8'})
     .json() // Similar to .headers({'Content-Type': 'application/json;charset=UTF-8'})
     .encode() // Similar to .headers({'Content-Type': 'application/x-www-form-urlencoded'})
@@ -195,3 +194,68 @@ this.request.stub('orders').getOrders({params}).then(...).error(...)
 ```
 
 
+## Use of Loaders
+
+
+The "Loader" meaning is a Tool that indicates a live cycle of the request. For example a Loading Spinner in the HTML Document.
+
+
+```javascript
+//............ MyLoader.js
+
+import {RequestLoader} from '@argab/request-service'
+
+class MyLoader extends RequestLoader {
+
+    _data
+    
+    /*
+    * @property: Number: Displays a number of requests that uses Loader and having pending status
+    * */
+    pending
+
+    constructor(data) {
+        super()
+        this._data = data
+    }
+
+    start() {
+        console.log('Requests in pending status: ', this.pending)
+        console.log('Pending the request: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
+    }
+
+    end() {
+        console.log('Request complete: ', `${this._data.method.toUpperCase()} ${this._data.uri}.`)
+    }
+
+}
+
+
+//............ MyApp.js
+
+import {Request} from '@argab/request-service'
+import ApiClient from './src/api/_clients/ApiClient'
+import MyLoader from './src/api/_loaders/MyLoader'
+import MyCustomLoader from './src/api/_loaders/MyCustomLoader'
+
+MyApp.prototype.request = new Request({
+  config: {
+      client: ApiClient,
+      loader: MyLoader,
+      useLoader: true // Loaders switcher
+  }
+})
+
+const app = new MyApp()
+
+app.request
+    // Loader switchers (optional):
+    .config({loader: MyCustomLoader}) // Setting any custom Loader for the request
+    .useLoader() // Boolean true as a default
+    .bg() // Similar to .useLoader(false)
+    
+    .get('http://some.url').success(...).error(...).catch(...).finally(...)
+    
+
+
+```

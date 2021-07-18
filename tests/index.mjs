@@ -1,9 +1,8 @@
 import axios from 'axios'
 
-import {Request, RequestRepository, ClientDecorator, RequestDecorator, RequestMediator, RequestMediatorDecorator, RequestHandler, RequestFactory} from '../dist/index.js'
+import {Request, RequestLoader, ClientDecorator, RequestHandler} from '../dist/index.js'
 import RepoPosts from './repo/posts.mjs';
 import PostsStub from './stubs/posts.mjs';
-
 
 const _axios = (config) => axios.create(config);
 
@@ -41,6 +40,26 @@ class Handler extends RequestHandler {
 
 }
 
+class Loader extends RequestLoader {
+
+    _data
+
+    constructor(data) {
+        super();
+        this._data = data
+    }
+
+    start() {
+        console.log('Requests in pending status: ', this.pending)
+        console.log('Pending the request: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
+    }
+
+    end() {
+        console.log('Request complete: ', `${this._data.method.toUpperCase()} ${this._data.uri}.`)
+    }
+
+}
+
 class App {
 
     getPosts() {
@@ -52,7 +71,8 @@ class App {
     getPostsRepo() {
         return this.request.repo('posts').getPosts().then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
-        }).catch(err => console.error(err)).await()
+            throw 'Checking ApiHandler.'
+        }).await()
     }
 
     getPostsStub() {
@@ -77,6 +97,8 @@ App.prototype.request = new Request({
     config: {
         client: Client,
         handler: Handler,
+        loader: Loader,
+        useLoader: true
     }
 
 })
@@ -90,7 +112,6 @@ const app = new App();
     await app.getPostsRepo();
 
     await app.getPostsStub()
-
 
 })();
 

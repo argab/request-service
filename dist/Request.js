@@ -45,6 +45,8 @@ var AbstractRequest = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_config", {
       handler: null,
       client: null,
+      loader: null,
+      useLoader: false,
       stubData: null,
       headers: {
         'Content-Type': 'application/json;charset=UTF-8'
@@ -58,8 +60,7 @@ var AbstractRequest = /*#__PURE__*/function () {
       "finally": null,
       "catch": null,
       done: null,
-      alert: null,
-      useLoader: false
+      alert: null
     });
   }
 
@@ -148,6 +149,9 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
               return Req._proxy(mediator.staged);
             }
 
+            stagedData.requestService || Object.assign(stagedData, {
+              requestService: Req
+            });
             var factory = new Req._factory(stagedData);
 
             if (factory instanceof _RequestFactory.RequestFactory && factory._client.prototype[method] instanceof Function) {

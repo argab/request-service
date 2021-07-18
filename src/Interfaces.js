@@ -1,5 +1,25 @@
 class RequestRepository {
+
+    /*
+    * @property: Object: An Instance of the Request implementing AbstractRequest
+    * @return: new Proxy
+    * */
     client
+}
+
+class RequestLoader {
+
+    /*
+    * @property pending: Number: Displays a number of requests which uses Loader and having pending status
+    * */
+    pending
+
+    start() {
+    }
+
+    end() {
+    }
+
 }
 
 class RequestHandler {
@@ -69,4 +89,4 @@ class RequestHandler {
     }
 }
 
-export {RequestHandler, RequestRepository}
+export {RequestHandler, RequestRepository, RequestLoader}
