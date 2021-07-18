@@ -255,7 +255,6 @@ app.request
     .bg() // Similar to .useLoader(false)
     
     .get('http://some.url').success(...).error(...).catch(...).finally(...)
-    
 
 
 ```
