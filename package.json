@@ -4,7 +4,7 @@
   "description": "Provides a fully customizable Library for handling API using Request repositories and Stubs.",
   "repository": {
     "type": "git",
-    "url": "git+https://argab@bitbucket.org/argab/request-service.git"
+    "url": "git+https://github.com/argab/request-service.git"
   },
   "keywords": [
     "Request Service",
@@ -15,9 +15,9 @@
   "author": "ArGab<argab.dev@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitbucket.org/argab/request-service/issues"
+    "url": "https://github.com/argab/request-service/issues"
   },
-  "homepage": "https://bitbucket.org/argab/request-service#readme",
+  "homepage": "https://github.com/argab/request-service#readme",
   "main": "index.js",
   "scripts": {
     "test": "node ./tests/index.mjs",
