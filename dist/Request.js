@@ -25,6 +25,8 @@ var _RequestFactory = require("./RequestFactory");
 
 var _Mediators = require("./Mediators");
 
+var _helpers = require("./helpers");
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -167,7 +169,8 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
             var factory = new Req._factory(stagedData);
 
             if (factory instanceof _RequestFactory.RequestFactory && factory._client.prototype[method] instanceof Function) {
-              var data = Req._config;
+              var data = _objectSpread({}, Req._config);
+
               var uri = arguments.length <= 0 ? undefined : arguments[0];
               var params = arguments.length <= 1 ? undefined : arguments[1];
               var config = (arguments.length <= 2 ? undefined : arguments[2]) instanceof Object ? arguments.length <= 2 ? undefined : arguments[2] : {};
@@ -175,7 +178,7 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
                 method: method,
                 uri: uri,
                 params: params,
-                config: _objectSpread(_objectSpread(_objectSpread({}, data), config), stagedData)
+                config: (0, _helpers.mergeDeep)(data, (0, _helpers.mergeDeep)(config, stagedData))
               });
 
               Req._requests.push(request);

@@ -1,6 +1,7 @@
 import {RequestRepository} from "./Interfaces"
 import {RequestFactory} from "./RequestFactory"
 import {RequestMediator, RequestMediatorDecorator} from "./Mediators"
+import {mergeDeep} from "./helpers"
 
 class AbstractRequest {
 
@@ -109,7 +110,7 @@ class Request extends AbstractRequest {
                     const factory = new Req._factory(stagedData)
 
                     if (factory instanceof RequestFactory && factory._client.prototype[method] instanceof Function) {
-                        const data = Req._config
+                        const data = {...Req._config}
                         const uri = props[0]
                         const params = props[1]
                         const config = props[2] instanceof Object ? props[2] : {}
@@ -117,7 +118,7 @@ class Request extends AbstractRequest {
                             method,
                             uri,
                             params,
-                            config: {...data, ...config, ...stagedData}
+                            config: mergeDeep(data, mergeDeep(config, stagedData))
                         })
 
                         Req._requests.push(request)

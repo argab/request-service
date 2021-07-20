@@ -1,13 +1,15 @@
+import {mergeDeep} from "./helpers"
+
 class RequestMediator {
 
     staged = {}
 
     constructor(stagedData) {
-        this.staged = stagedData instanceof Object ? stagedData : {}
+        stagedData instanceof Object && (this.staged = stagedData)
     }
 
     config(data) {
-        data instanceof Object && Object.assign(this.staged, data)
+        data instanceof Object && (this.staged = mergeDeep(this.staged, data))
     }
 
     stubData(stubData) {

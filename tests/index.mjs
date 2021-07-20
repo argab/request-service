@@ -50,6 +50,8 @@ class Handler extends RequestHandler {
     }
 
     after(response) {
+        console.log(this._data.headers)
+
         const notifySuccess = this._data.done;
         const notifyError = this._data.alert;
 
@@ -127,6 +129,8 @@ App.prototype.request = new Request({
         mediator: {
             awesome: function () {
                 console.log('This is my awesome mediator function!')
+
+                this.config({headers: {'X-AwesomeHeader': 'v1.0.0'}})
             }
         },
         request: {
@@ -157,7 +161,7 @@ const app = new App();
 
     await app.getPostsStub();
 
-    app.request.awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
+    app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
 
 })();
 
