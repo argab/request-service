@@ -61,7 +61,7 @@ class RequestDecorator {
                     resolve(this.data.statusCode)
                     clearInterval(interval)
                 }
-            }, 1000)
+            }, 100)
         })
     }
 

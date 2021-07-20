@@ -186,7 +186,7 @@ var RequestDecorator = /*#__PURE__*/function () {
             resolve(_this.data.statusCode);
             clearInterval(interval);
           }
-        }, 1000);
+        }, 100);
       });
     }
   }]);
