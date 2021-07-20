@@ -27,8 +27,12 @@ class AbstractRequest {
         error: null,
         finally: null,
         catch: null,
-        done: null,
-        alert: null
+        dataError: null,
+    }
+
+    _extend = {
+        mediator: null,
+        request: null
     }
 
     repo() {
@@ -41,7 +45,7 @@ class AbstractRequest {
 
 class Request extends AbstractRequest {
 
-    constructor({config, getRepo, getStub, useStubs, factory, mediator}) {
+    constructor({config, getRepo, getStub, useStubs, factory, mediator, extend}) {
         super()
         this._getRepo = getRepo instanceof Function ? getRepo : () => null
         this._getStub = getStub instanceof Function ? getStub : () => null
@@ -50,6 +54,7 @@ class Request extends AbstractRequest {
         this._mediator = RequestMediator.isPrototypeOf(mediator) ? mediator : RequestMediatorDecorator
 
         config instanceof Object && Object.assign(this._config, config)
+        extend instanceof Object && Object.assign(this._extend, extend)
 
         return this._proxy()
     }
@@ -87,11 +92,16 @@ class Request extends AbstractRequest {
 
                     stagedData instanceof Object || (stagedData = {})
 
-                    const mediator = new Req._mediator(stagedData)
-
-                    if (mediator instanceof RequestMediator && mediator[method] instanceof Function) {
-                        mediator[method](props[0])
-                        return Req._proxy(mediator.staged)
+                    if (RequestMediator.isPrototypeOf(Req._mediator)) {
+                        const extend = Req._extend.mediator
+                        extend instanceof Object && Object.keys(extend).forEach(key => {
+                            Req._mediator.prototype[key] = extend[key]
+                        })
+                        if (Req._mediator.prototype[method] instanceof Function) {
+                            const mediator = new Req._mediator(stagedData)
+                            mediator[method](props[0])
+                            return Req._proxy(mediator.staged)
+                        }
                     }
 
                     stagedData.requestService || Object.assign(stagedData, {requestService: Req})

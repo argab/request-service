@@ -10,7 +10,7 @@ class RequestRepository {
 class RequestLoader {
 
     /*
-    * @property pending: Number: Displays a number of requests which uses Loader and having pending status
+    * @property: Number: Displays a number of requests that uses Loader and having pending status
     * */
     pending
 
@@ -45,7 +45,7 @@ class RequestHandler {
     /*
     * method executes within a Promise.prototype.then()
     * @params: incoming response data
-    * @return Anything on Success
+    * @return: void
     * */
     onSuccess() {
     }
@@ -53,7 +53,7 @@ class RequestHandler {
     /*
     * method executes within a Promise.prototype.then()
     * @params: incoming response data
-    * @return Anything on Error
+    * @return: void
     * */
     onError() {
     }
@@ -61,6 +61,7 @@ class RequestHandler {
     /*
     * method executes within a Promise.prototype.catch()
     * @params: error
+    * @return: void
     * */
     onCatch() {
     }
@@ -68,24 +69,41 @@ class RequestHandler {
     /*
     * method executes within a Promise.prototype.finally()
     * @params: request data
+    * @return: void
     * */
     onFinally() {
     }
 
     /*
-    * method calls before request send
+    * method executes before request sent
     * @params: request data
-    * @return modified request data
+    * @return: void
     * */
     before() {
     }
 
     /*
-    * method calls on incoming response data
-    * @params: response data
-    * @return modified response data
+    * method executes at the start of a Promise.prototype.then()
+    * @params: response
+    * @return: void
     * */
     after() {
+    }
+
+    /*
+    * method executes at the start of a Promise.prototype.catch()
+    * @params: error
+    * @return: void
+    * */
+    afterCatch() {
+    }
+
+    /*
+    * method executes at the start of a Promise.prototype.finally()
+    * @params: request data
+    * @return: void
+    * */
+    afterFinally() {
     }
 }
 

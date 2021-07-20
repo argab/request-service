@@ -34,8 +34,30 @@ class Client extends ClientDecorator {
 
 class Handler extends RequestHandler {
 
+    _data
+
+    constructor(data) {
+        super();
+        this._data = data
+    }
+
     onCatch(error) {
         console.error(error)
+    }
+
+    isSuccess(response) {
+        return true
+    }
+
+    after(response) {
+        const notifySuccess = this._data.done;
+        const notifyError = this._data.alert;
+
+        if (this.isSuccess(response) && notifySuccess) {
+            console.log(notifySuccess)
+        } else if (this.isError(response) && notifyError) {
+            console.error(notifyError)
+        }
     }
 
 }
@@ -51,7 +73,7 @@ class Loader extends RequestLoader {
 
     start() {
         console.log('Requests in pending status: ', this.pending)
-        console.log('Pending the request: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
+        console.log('Request pending: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
     }
 
     end() {
@@ -99,6 +121,28 @@ App.prototype.request = new Request({
         handler: Handler,
         loader: Loader,
         useLoader: true
+    },
+
+    extend: {
+        mediator: {
+            awesome: function () {
+                console.log('This is my awesome mediator function!')
+            }
+        },
+        request: {
+            done: function (messageOnSuccess) {
+                console.log(`This is what my ApiHandler would notify about at response success: `, messageOnSuccess)
+
+                this.data.done = messageOnSuccess
+                return this
+            },
+            alert: function (messageOnError) {
+                console.log(`This is what my ApiHandler would notify about at response error: `, messageOnError)
+
+                this.data.alert = messageOnError
+                return this
+            }
+        }
     }
 
 })
@@ -111,7 +155,9 @@ const app = new App();
 
     await app.getPostsRepo();
 
-    await app.getPostsStub()
+    await app.getPostsStub();
+
+    app.request.awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
 
 })();
 

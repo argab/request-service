@@ -2,7 +2,7 @@
 
 Provides a fully customizable Library for handling API using Request repositories and Stubs.
 
-## Initialization
+## Initialisation
 
 1. Create your own Request client ES-6 class extending "ClientDecorator" from the package.
 
@@ -40,7 +40,7 @@ export default class extends ClientDecorator {
 
 //........... ApiHandler.js
 
-import {RequestHandler} from "@argab/request-service"
+import {RequestHandler} from '@argab/request-service'
 
 export default class extends RequestHandler {
 
@@ -66,6 +66,12 @@ export default class extends RequestHandler {
     }
     
     after(response) {
+    }
+    
+    afterCatch(error) {
+    }
+    
+    afterFinally(requestData) {
     }
 }
 
@@ -210,7 +216,8 @@ class MyLoader extends RequestLoader {
     _data
     
     /*
-    * @property: Number: Displays a number of requests that uses Loader and having pending status
+    * @property: Displays a number of requests 
+    * that uses Loader and having pending status
     * */
     pending
 
@@ -221,7 +228,7 @@ class MyLoader extends RequestLoader {
 
     start() {
         console.log('Requests in pending status: ', this.pending)
-        console.log('Pending the request: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
+        console.log('Request pending: ', `${this._data.method.toUpperCase()} ${this._data.uri}...`)
     }
 
     end() {
@@ -258,3 +265,99 @@ app.request
 
 
 ```
+
+## Extending RequestDecorator And Mediator
+
+By Passing argument named "extend" allows to inject any custom pre-request and post-request handling methods to
+the Base Request's prototype.
+
+```javascript
+
+//............ MyApp.js
+
+import {Request} from '@argab/request-service'
+import ApiClient from './src/api/_clients/ApiClient'
+import ApiHandler from './src/api/_handlers/ApiHandler'
+
+MyApp.prototype.request = new Request({
+  config: {
+      client: ApiClient,
+      handler: ApiHandler
+  },
+  extend: {
+        mediator: {
+            // Be aware to declare via "function" as it allows to access to the current context by "this".
+            awesome: function () {
+                console.log('This is my awesome mediator function!')
+                
+                this.config({headers: {'X-AwesomeHeader': 'v1.0.0'}})
+            }
+        },
+        request: {
+            done: function (messageOnSuccess) {
+                console.log(`This is what my ApiHandler would notify about at response success: `, messageOnSuccess)
+    
+                this.data.done = messageOnSuccess
+                return this
+            },
+            alert: function (messageOnError) {
+                console.log(`This is what my ApiHandler would notify about at response error: `, messageOnError)
+    
+                this.data.alert = messageOnError
+                return this
+            }
+        }
+  }
+})
+
+//........... ApiHandler.js
+
+import {RequestHandler} from '@argab/request-service'
+
+export default class extends RequestHandler {
+
+    _data
+    
+    constructor(data) {
+        super()
+        this._data = data
+    }
+
+    isSuccess(response) {
+        return true
+    }
+
+    after(response) {
+        const notifySuccess = this._data.done;
+        const notifyError = this._data.alert;
+
+        if (this.isSuccess(response) && notifySuccess) {
+            console.log(notifySuccess)
+        } else if (this.isError(response) && notifyError) {
+            console.error(notifyError)
+        }
+    }
+}
+
+//////////////////////////
+
+const app = new MyApp()
+
+app.request.awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
+
+```
+
+Output from tests:
+
+
+```
+This is my awesome mediator function!
+Requests in pending status:  1
+Request pending:  GET /posts...
+This is what my ApiHandler would notify about at response success:  Wow, that`s awesome!
+This is what my ApiHandler would notify about at response error:  Ooops...
+Wow, that`s awesome!
+Request complete:  GET /posts.
+```
+
+

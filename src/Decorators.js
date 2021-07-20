@@ -50,16 +50,6 @@ class RequestDecorator {
         return this
     }
 
-    done(messageOnSuccess) {
-        this.data.done = messageOnSuccess
-        return this
-    }
-
-    alert(messageOnError) {
-        this.data.alert = messageOnError
-        return this
-    }
-
     /*
     * This method should be called at the end as it returns a new Promise with the request status code.
     * @return: Number request`s statusCode

@@ -59,8 +59,11 @@ var AbstractRequest = /*#__PURE__*/function () {
       error: null,
       "finally": null,
       "catch": null,
-      done: null,
-      alert: null
+      dataError: null
+    });
+    (0, _defineProperty2["default"])(this, "_extend", {
+      mediator: null,
+      request: null
     });
   }
 
@@ -89,7 +92,8 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
         getStub = _ref.getStub,
         useStubs = _ref.useStubs,
         factory = _ref.factory,
-        mediator = _ref.mediator;
+        mediator = _ref.mediator,
+        extend = _ref.extend;
     (0, _classCallCheck2["default"])(this, Request);
     _this = _super.call(this);
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
@@ -102,6 +106,7 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
     _this._factory = _RequestFactory.RequestFactory.isPrototypeOf(factory) ? factory : _RequestFactory.RequestFactory;
     _this._mediator = _Mediators.RequestMediator.isPrototypeOf(mediator) ? mediator : _Mediators.RequestMediatorDecorator;
     config instanceof Object && Object.assign(_this._config, config);
+    extend instanceof Object && Object.assign(_this._extend, extend);
     return (0, _possibleConstructorReturn2["default"])(_this, _this._proxy());
   }
 
@@ -142,11 +147,18 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
             }
 
             stagedData instanceof Object || (stagedData = {});
-            var mediator = new Req._mediator(stagedData);
 
-            if (mediator instanceof _Mediators.RequestMediator && mediator[method] instanceof Function) {
-              mediator[method](arguments.length <= 0 ? undefined : arguments[0]);
-              return Req._proxy(mediator.staged);
+            if (_Mediators.RequestMediator.isPrototypeOf(Req._mediator)) {
+              var extend = Req._extend.mediator;
+              extend instanceof Object && Object.keys(extend).forEach(function (key) {
+                Req._mediator.prototype[key] = extend[key];
+              });
+
+              if (Req._mediator.prototype[method] instanceof Function) {
+                var mediator = new Req._mediator(stagedData);
+                mediator[method](arguments.length <= 0 ? undefined : arguments[0]);
+                return Req._proxy(mediator.staged);
+              }
             }
 
             stagedData.requestService || Object.assign(stagedData, {

@@ -18,6 +18,12 @@ class RequestFactory {
 
     create({method, uri, params, config}) {
         config instanceof Object || (config = {})
+
+        if (this._requestService) {
+            const extend = this._requestService._extend.request
+            extend instanceof Object && Object.keys(extend).forEach(key => this._request.prototype[key] = extend[key])
+        }
+
         return new this._request({...config, ...{uri, params, method}})
     }
 
@@ -65,38 +71,38 @@ class RequestFactory {
     resolveClient(client, request) {
 
         const handlers = this.getHandlers(request.data)
-        request.data = this.resolveHandlers(request.data, handlers, 'before')
+        this.resolveHandlers(request.data, handlers, 'before')
 
         const dataClient = request.data.stubData || client[request.data.method](request.data)
         const promise = dataClient instanceof Promise
             ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
-
+        const Loader = (request.data.useLoader
+            && (RequestLoader.isPrototypeOf(request.data.loader) || RequestLoader.prototype === request.data.loader.prototype))
+            ? new request.data.loader(request.data) : null
         const getLoader = () => {
-            const loader = (request.data.useLoader
-                && (RequestLoader.isPrototypeOf(request.data.loader) || RequestLoader.prototype === request.data.loader.prototype))
-                ? new request.data.loader(request.data) : null
-            loader && (loader.pending = this._requestService?._requests.filter(r => r.data.useLoader && !r.data.statusCode).length)
-            return loader
+            Loader && (Loader.pending = this._requestService?._requests.filter(r => r.data.useLoader && !r.data.statusCode).length)
+            return Loader
         }
+
         getLoader()?.start()
 
         promise.then(response => {
-            this.resolveClientOnResponse(response, request)
+            this.resolveClientOnResponse(response, request, handlers)
             request.data.statusCode || (request.data.statusCode = 200)
         }).catch(error => {
-            this.resolveClientOnCatch(error, request)
+            this.resolveClientOnCatch(error, request, handlers)
             request.data.statusCode || (request.data.statusCode = 500)
+            request.data.dataError = error
         }).finally(() => {
-            this.resolveClientOnFinally(request)
+            this.resolveClientOnFinally(request, handlers)
             request.data.statusCode || (request.data.statusCode = 200)
             getLoader()?.end()
         })
 
     }
 
-    resolveClientOnResponse(response, request) {
+    resolveClientOnResponse(response, request, handlers) {
 
-        const handlers = this.getHandlers(request.data)
         this.resolveHandlers(response, handlers, 'after')
 
         const isSuccess = this.resolveHandlers({...response}, handlers, 'isSuccess')
@@ -118,9 +124,9 @@ class RequestFactory {
         return response
     }
 
-    resolveClientOnCatch(error, request) {
+    resolveClientOnCatch(error, request, handlers) {
 
-        const handlers = this.getHandlers(request.data)
+        this.resolveHandlers(error, handlers, 'afterCatch')
 
         if (request.data.catch instanceof Function) {
             try {
@@ -135,9 +141,9 @@ class RequestFactory {
         return error
     }
 
-    resolveClientOnFinally(request) {
+    resolveClientOnFinally(request, handlers) {
 
-        const handlers = this.getHandlers(request.data)
+        this.resolveHandlers(request.data, handlers, 'afterFinally')
 
         if (request.data.finally instanceof Function) {
             try {
