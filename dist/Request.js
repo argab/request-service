@@ -113,41 +113,37 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
   }
 
   (0, _createClass2["default"])(Request, [{
+    key: "repo",
+    value: function repo(path) {
+      if (this._useStubs) {
+        var stub = this.stub(path);
+
+        if (stub) {
+          return stub;
+        }
+      }
+
+      var repo = this._getRepo(path);
+
+      repo instanceof _Interfaces.RequestRepository && (repo.client = this._proxy());
+      return repo;
+    }
+  }, {
+    key: "stub",
+    value: function stub(path) {
+      var repo = this._getStub(path);
+
+      repo instanceof _Interfaces.RequestRepository && (repo.client = this._proxy());
+      return repo;
+    }
+  }, {
     key: "_proxy",
     value: function _proxy(stagedData) {
       return new Proxy(this, {
         get: function get(Req, method) {
           return function () {
-            var stub = function stub(path) {
-              var repo = Req._getStub(path);
-
-              repo instanceof _Interfaces.RequestRepository && (repo.client = Req._proxy());
-              return repo;
-            };
-
-            var repo = function repo(path) {
-              if (Req._useStubs) {
-                var _stub = stub(path);
-
-                if (_stub) {
-                  return _stub;
-                }
-              }
-
-              var repo = Req._getRepo(path);
-
-              repo instanceof _Interfaces.RequestRepository && (repo.client = Req._proxy());
-              return repo;
-            };
-
-            if (method === 'repo') {
-              return repo(arguments.length <= 0 ? undefined : arguments[0]);
-            }
-
-            if (method === 'stub') {
-              return stub(arguments.length <= 0 ? undefined : arguments[0]);
-            }
-
+            if (method === 'repo') return Req.repo(arguments.length <= 0 ? undefined : arguments[0]);
+            if (method === 'stub') return Req.stub(arguments.length <= 0 ? undefined : arguments[0]);
             stagedData instanceof Object || (stagedData = {});
 
             if (_Mediators.RequestMediator.isPrototypeOf(Req._mediator)) {

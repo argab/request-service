@@ -60,36 +60,32 @@ class Request extends AbstractRequest {
         return this._proxy()
     }
 
+    repo(path) {
+        if (this._useStubs) {
+            const stub = this.stub(path)
+            if (stub) {
+                return stub
+            }
+        }
+        const repo = this._getRepo(path)
+        repo instanceof RequestRepository && (repo.client = this._proxy())
+        return repo
+    }
+
+    stub(path) {
+        const repo = this._getStub(path)
+        repo instanceof RequestRepository && (repo.client = this._proxy())
+        return repo
+    }
+
     _proxy(stagedData) {
         return new Proxy(this, {
             get: function (Req, method) {
                 return function (...props) {
 
-                    const stub = (path) => {
-                        const repo = Req._getStub(path)
-                        repo instanceof RequestRepository && (repo.client = Req._proxy())
-                        return repo
-                    }
+                    if (method === 'repo') return Req.repo(props[0])
 
-                    const repo = (path) => {
-                        if (Req._useStubs) {
-                            const _stub = stub(path)
-                            if (_stub) {
-                                return _stub
-                            }
-                        }
-                        const repo = Req._getRepo(path)
-                        repo instanceof RequestRepository && (repo.client = Req._proxy())
-                        return repo
-                    }
-
-                    if (method === 'repo') {
-                        return repo(props[0])
-                    }
-
-                    if (method === 'stub') {
-                        return stub(props[0])
-                    }
+                    if (method === 'stub') return Req.stub(props[0])
 
                     stagedData instanceof Object || (stagedData = {})
 
