@@ -171,10 +171,10 @@ var RequestFactory = /*#__PURE__*/function () {
 
       if (request.data["catch"] instanceof Function) {
         try {
-          this.setRequestResult(error, request.data["catch"](error));
+          this.setRequestResult(request, request.data["catch"](error));
           request.data.dataError = error;
         } catch (err) {
-          this.setRequestResult(err, this.resolveHandlers(err, handlers, 'onCatch'));
+          this.setRequestResult(request, this.resolveHandlers(err, handlers, 'onCatch'));
           request.data.dataError = err;
         }
       } else {
