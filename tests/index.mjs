@@ -91,20 +91,20 @@ class Loader extends RequestLoader {
 class App {
 
     getPosts() {
-        return this.request.get('/posts').then(response => {
+        return this.request.unlog().get('/posts').then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
         }).catch(err => console.error(err)).await()
     }
 
     getPostsRepo() {
-        return this.request.repo('posts').getPosts().then(response => {
+        return this.request.unlog().repo('posts').getPosts().then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
             throw 'Checking ApiHandler.'
         }).await()
     }
 
     getPostsStub() {
-        return this.request.stub('posts').getPosts().then(response => {
+        return this.request.unlog().stub('posts').getPosts().then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
         }).catch(err => console.error(err)).await()
     }
@@ -168,6 +168,7 @@ const app = new App();
     const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await();
 
     console.log(result)
+    console.log('requests logged number: ', app.request.getLog().length)
 
 })();
 

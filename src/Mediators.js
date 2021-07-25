@@ -16,6 +16,10 @@ class RequestMediator {
         this.config({stubData})
     }
 
+    unlog() {
+        this.config({log: false})
+    }
+
 }
 
 class RequestMediatorDecorator extends RequestMediator {

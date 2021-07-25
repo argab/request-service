@@ -78,7 +78,7 @@ export default class extends RequestHandler {
 ```
 
 
-2.  Initialize the Request Service and connect it to your App:
+2.  Initialise the Request Service and connect it to your App:
 
 ```javascript
 import {Request} from '@argab/request-service'
@@ -106,30 +106,36 @@ import SomeHandler from './src/api/SomeHandler'
 import SomeClient from './src/api/SomeClient'
 
 this.request
-    // configurating (optional):
+    // Configuring (optional):
     .config({ 
         handler: [SomeHandler, ApiHandler],
         client: SomeClient,
-        headers: {'Content-Type': 'application/json;charset=UTF-8'}
+        headers: {'Content-Type': 'application/json;charset=UTF-8'},
+        
+        log: false  // (TRUE as a default) Use this flag to enable/disable 
+                    // the request logging on the main Request instance;
+                    // The requests log may be retrieved from the main instance 
+                    // by calling "getLog" method (f.e: this.request.getLog())
     })
     
-    // mediators (optional):
+    // Mediators (optional):
+    .unlog() // Use this flag to disable the request logging
     .headers({'Content-Type': 'application/json;charset=UTF-8'})
     .json() // Similar to .headers({'Content-Type': 'application/json;charset=UTF-8'})
     .encode() // Similar to .headers({'Content-Type': 'application/x-www-form-urlencoded'})
     .form() // Similar to .headers({'Content-Type': 'multipart/form-data'})
     .html() // Similar to .headers({'Accept': 'text/html'})
     
-    // client decorator (required):
+    // Client Decorator (required):
     .post('http://some.url', {parameters}, {optionalConfig})
     
-    // request decorators (optional):
+    // Request Decorators (optional):
     .success(response => {}) // or .then(...)
     .error(response => {}) // If not called, then ApiHandler`s "onError" will be executed.
     .catch(error => {}) // If not called, then ApiHandler`s "onCatch" will be executed.
     .finally(requestData => {}) // If not called, then ApiHandler`s "onFinally" will be executed.
 
-    // get a new Promise.prototype;
+    // get as a new Promise.prototype;
     // as a result we get the request`s result and statusCode here
     // @return: {result, statusCode}
     .await()

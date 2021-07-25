@@ -44,6 +44,13 @@ var RequestMediator = /*#__PURE__*/function () {
         stubData: _stubData
       });
     }
+  }, {
+    key: "unlog",
+    value: function unlog() {
+      this.config({
+        log: false
+      });
+    }
   }]);
   return RequestMediator;
 }();

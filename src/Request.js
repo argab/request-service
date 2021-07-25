@@ -30,6 +30,7 @@ class AbstractRequest {
         catch: null,
         dataError: null,
         result: null,
+        log: true
     }
 
     _extend = {
@@ -41,6 +42,9 @@ class AbstractRequest {
     }
 
     stub() {
+    }
+
+    getLog() {
     }
 
 }
@@ -79,10 +83,16 @@ class Request extends AbstractRequest {
         return repo
     }
 
+    getLog() {
+        return this._requests
+    }
+
     _proxy(stagedData) {
         return new Proxy(this, {
             get: function (Req, method) {
                 return function (...props) {
+
+                    if (method === 'getLog') return Req.getLog()
 
                     if (method === 'repo') return Req.repo(props[0])
 
@@ -118,7 +128,7 @@ class Request extends AbstractRequest {
                             config: mergeDeep(data, mergeDeep(config, stagedData))
                         })
 
-                        Req._requests.push(request)
+                        request.data.log && Req._requests.push(request)
 
                         return factory.dispatch(request)
                     }

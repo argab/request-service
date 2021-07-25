@@ -62,7 +62,8 @@ var AbstractRequest = /*#__PURE__*/function () {
       "finally": null,
       "catch": null,
       dataError: null,
-      result: null
+      result: null,
+      log: true
     });
     (0, _defineProperty2["default"])(this, "_extend", {
       mediator: null,
@@ -76,6 +77,9 @@ var AbstractRequest = /*#__PURE__*/function () {
   }, {
     key: "stub",
     value: function stub() {}
+  }, {
+    key: "getLog",
+    value: function getLog() {}
   }]);
   return AbstractRequest;
 }();
@@ -138,11 +142,17 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
       return repo;
     }
   }, {
+    key: "getLog",
+    value: function getLog() {
+      return this._requests;
+    }
+  }, {
     key: "_proxy",
     value: function _proxy(stagedData) {
       return new Proxy(this, {
         get: function get(Req, method) {
           return function () {
+            if (method === 'getLog') return Req.getLog();
             if (method === 'repo') return Req.repo(arguments.length <= 0 ? undefined : arguments[0]);
             if (method === 'stub') return Req.stub(arguments.length <= 0 ? undefined : arguments[0]);
             stagedData instanceof Object || (stagedData = {});
@@ -177,9 +187,7 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
                 params: params,
                 config: (0, _helpers.mergeDeep)(data, (0, _helpers.mergeDeep)(config, stagedData))
               });
-
-              Req._requests.push(request);
-
+              request.data.log && Req._requests.push(request);
               return factory.dispatch(request);
             }
           };
