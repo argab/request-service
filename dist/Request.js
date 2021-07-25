@@ -61,7 +61,8 @@ var AbstractRequest = /*#__PURE__*/function () {
       error: null,
       "finally": null,
       "catch": null,
-      dataError: null
+      dataError: null,
+      result: null
     });
     (0, _defineProperty2["default"])(this, "_extend", {
       mediator: null,

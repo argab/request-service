@@ -62,6 +62,10 @@ class Handler extends RequestHandler {
         }
     }
 
+    onSuccess() {
+        return 'This is a request result.'
+    }
+
 }
 
 class Loader extends RequestLoader {
@@ -161,7 +165,9 @@ const app = new App();
 
     await app.getPostsStub();
 
-    app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
+    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await();
+
+    console.log(result)
 
 })();
 

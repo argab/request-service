@@ -56,16 +56,16 @@ class RequestFactory {
 
     resolveHandlers(data, handlers, action) {
 
-        let resolve = data
+        let result = undefined
 
         handlers.forEach(handler => {
             if (handler[action] instanceof Function) {
-                const data = handler[action](resolve)
-                data === undefined || (resolve = data)
+                const data = handler[action](data)
+                data === undefined || (result = data)
             }
         })
 
-        return resolve
+        return result
     }
 
     resolveClient(client, request) {
@@ -92,7 +92,6 @@ class RequestFactory {
         }).catch(error => {
             this.resolveClientOnCatch(error, request, handlers)
             request.data.statusCode || (request.data.statusCode = 500)
-            request.data.dataError = error
         }).finally(() => {
             this.resolveClientOnFinally(request, handlers)
             request.data.statusCode || (request.data.statusCode = 200)
@@ -105,23 +104,22 @@ class RequestFactory {
 
         this.resolveHandlers(response, handlers, 'after')
 
-        const isSuccess = this.resolveHandlers({...response}, handlers, 'isSuccess')
-        const isError = this.resolveHandlers({...response}, handlers, 'isError')
+        const _response = {...response}
+        const isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess')
+        const isError = this.resolveHandlers(_response, handlers, 'isError')
 
         if (isSuccess === true || (isSuccess !== true && isError !== true)) {
 
-            request.data.success instanceof Function
+            this.setRequestResult(request, request.data.success instanceof Function
                 ? request.data.success(response)
-                : this.resolveHandlers(response, handlers, 'onSuccess')
+                : this.resolveHandlers(response, handlers, 'onSuccess'))
 
         } else if (isError === true) {
 
-            request.data.error instanceof Function
+            this.setRequestResult(request, request.data.error instanceof Function
                 ? request.data.error(response)
-                : this.resolveHandlers(response, handlers, 'onError')
+                : this.resolveHandlers(response, handlers, 'onError'))
         }
-
-        return response
     }
 
     resolveClientOnCatch(error, request, handlers) {
@@ -130,30 +128,39 @@ class RequestFactory {
 
         if (request.data.catch instanceof Function) {
             try {
-                request.data.catch(error)
+                this.setRequestResult(request, request.data.catch(error))
+                request.data.dataError = error
             } catch (err) {
-                this.resolveHandlers(err, handlers, 'onCatch')
+                this.setRequestResult(request, this.resolveHandlers(err, handlers, 'onCatch'))
+                request.data.dataError = err
             }
         } else {
-            this.resolveHandlers(error, handlers, 'onCatch')
+            this.setRequestResult(request, this.resolveHandlers(error, handlers, 'onCatch'))
         }
-
-        return error
     }
 
     resolveClientOnFinally(request, handlers) {
 
         this.resolveHandlers(request.data, handlers, 'afterFinally')
 
+        let result = null
+
         if (request.data.finally instanceof Function) {
             try {
-                request.data.finally(request.data)
+                result = request.data.finally(request.data)
             } catch (err) {
-                this.resolveHandlers(err, handlers, 'onCatch')
+                result = this.resolveHandlers(err, handlers, 'onCatch')
             }
         } else {
-            this.resolveHandlers(request.data, handlers, 'onFinally')
+            result = this.resolveHandlers(request.data, handlers, 'onFinally')
         }
+
+        request.data.result === null && this.setRequestResult(request, result)
+    }
+
+    setRequestResult(request, result) {
+        request.data.result = result === undefined ? null : result
+        return this
     }
 
 }

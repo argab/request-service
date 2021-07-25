@@ -29,6 +29,7 @@ class AbstractRequest {
         finally: null,
         catch: null,
         dataError: null,
+        result: null,
     }
 
     _extend = {

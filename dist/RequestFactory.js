@@ -95,15 +95,15 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "resolveHandlers",
     value: function resolveHandlers(data, handlers, action) {
-      var resolve = data;
+      var result = undefined;
       handlers.forEach(function (handler) {
         if (handler[action] instanceof Function) {
-          var _data = handler[action](resolve);
+          var _data = handler[action](_data);
 
-          _data === undefined || (resolve = _data);
+          _data === undefined || (result = _data);
         }
       });
-      return resolve;
+      return result;
     }
   }, {
     key: "resolveClient",
@@ -139,7 +139,6 @@ var RequestFactory = /*#__PURE__*/function () {
         _this2.resolveClientOnCatch(error, request, handlers);
 
         request.data.statusCode || (request.data.statusCode = 500);
-        request.data.dataError = error;
       })["finally"](function () {
         var _getLoader2;
 
@@ -153,16 +152,17 @@ var RequestFactory = /*#__PURE__*/function () {
     key: "resolveClientOnResponse",
     value: function resolveClientOnResponse(response, request, handlers) {
       this.resolveHandlers(response, handlers, 'after');
-      var isSuccess = this.resolveHandlers(_objectSpread({}, response), handlers, 'isSuccess');
-      var isError = this.resolveHandlers(_objectSpread({}, response), handlers, 'isError');
+
+      var _response = _objectSpread({}, response);
+
+      var isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess');
+      var isError = this.resolveHandlers(_response, handlers, 'isError');
 
       if (isSuccess === true || isSuccess !== true && isError !== true) {
-        request.data.success instanceof Function ? request.data.success(response) : this.resolveHandlers(response, handlers, 'onSuccess');
+        this.setRequestResult(request, request.data.success instanceof Function ? request.data.success(response) : this.resolveHandlers(response, handlers, 'onSuccess'));
       } else if (isError === true) {
-        request.data.error instanceof Function ? request.data.error(response) : this.resolveHandlers(response, handlers, 'onError');
+        this.setRequestResult(request, request.data.error instanceof Function ? request.data.error(response) : this.resolveHandlers(response, handlers, 'onError'));
       }
-
-      return response;
     }
   }, {
     key: "resolveClientOnCatch",
@@ -171,30 +171,39 @@ var RequestFactory = /*#__PURE__*/function () {
 
       if (request.data["catch"] instanceof Function) {
         try {
-          request.data["catch"](error);
+          this.setRequestResult(request, request.data["catch"](error));
+          request.data.dataError = error;
         } catch (err) {
-          this.resolveHandlers(err, handlers, 'onCatch');
+          this.setRequestResult(request, this.resolveHandlers(err, handlers, 'onCatch'));
+          request.data.dataError = err;
         }
       } else {
-        this.resolveHandlers(error, handlers, 'onCatch');
+        this.setRequestResult(request, this.resolveHandlers(error, handlers, 'onCatch'));
       }
-
-      return error;
     }
   }, {
     key: "resolveClientOnFinally",
     value: function resolveClientOnFinally(request, handlers) {
       this.resolveHandlers(request.data, handlers, 'afterFinally');
+      var result = null;
 
       if (request.data["finally"] instanceof Function) {
         try {
-          request.data["finally"](request.data);
+          result = request.data["finally"](request.data);
         } catch (err) {
-          this.resolveHandlers(err, handlers, 'onCatch');
+          result = this.resolveHandlers(err, handlers, 'onCatch');
         }
       } else {
-        this.resolveHandlers(request.data, handlers, 'onFinally');
+        result = this.resolveHandlers(request.data, handlers, 'onFinally');
       }
+
+      request.data.result === null && this.setRequestResult(request, result);
+    }
+  }, {
+    key: "setRequestResult",
+    value: function setRequestResult(request, result) {
+      request.data.result = result === undefined ? null : result;
+      return this;
     }
   }]);
   return RequestFactory;

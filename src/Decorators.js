@@ -51,14 +51,14 @@ class RequestDecorator {
     }
 
     /*
-    * This method should be called at the end as it returns a new Promise with the request status code.
-    * @return: Number request`s statusCode
+    * This method should be called at the end as it returns a new Promise.
+    * @return: {result, statusCode}
     * */
     await() {
         return new Promise(resolve => {
             const interval = setInterval(() => {
                 if (this.data.statusCode) {
-                    resolve(this.data.statusCode)
+                    resolve({result: this.data.result, statusCode: this.data.statusCode})
                     clearInterval(interval)
                 }
             }, 100)

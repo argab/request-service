@@ -171,8 +171,8 @@ var RequestDecorator = /*#__PURE__*/function () {
       return this;
     }
     /*
-    * This method should be called at the end as it returns a new Promise with the request status code.
-    * @return: Number request`s statusCode
+    * This method should be called at the end as it returns a new Promise.
+    * @return: {result, statusCode}
     * */
 
   }, {
@@ -183,7 +183,10 @@ var RequestDecorator = /*#__PURE__*/function () {
       return new Promise(function (resolve) {
         var interval = setInterval(function () {
           if (_this.data.statusCode) {
-            resolve(_this.data.statusCode);
+            resolve({
+              result: _this.data.result,
+              statusCode: _this.data.statusCode
+            });
             clearInterval(interval);
           }
         }, 100);
