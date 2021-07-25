@@ -130,7 +130,8 @@ this.request
     .finally(requestData => {}) // If not called, then ApiHandler`s "onFinally" will be executed.
 
     // get a new Promise.prototype;
-    // as a result we get the request`s statusCode here
+    // as a result we get the request`s result and statusCode here
+    // @return: {result, statusCode}
     .await()
 
 ```
