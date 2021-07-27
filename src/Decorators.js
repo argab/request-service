@@ -1,3 +1,5 @@
+import {proxy} from './helpers'
+
 class ClientDecorator {
 
     async get() {
@@ -21,33 +23,49 @@ class RequestDecorator {
 
     data = {}
 
+    _chain = []
+
     constructor(data) {
         this.data = data
+
+        const _proxy = (state) => proxy(state, ['data'], (state, method, args) => {
+
+            if (method === 'chainPush') return state.chainPush(args[0])
+
+            state.chainPush({method, args})
+
+            if (method === 'await') return state.await()
+
+            state[method](args[0], args[1], args[2], args[3])
+
+            return _proxy(state)
+        })
+
+        return _proxy(this)
+    }
+
+    chainPush({method, args}) {
+        this._chain.push({method, args})
     }
 
     success(callback) {
         this.data.success = callback
-        return this
     }
 
     then(callback) {
         this.data.success = callback
-        return this
     }
 
     error(callback) {
         this.data.error = callback
-        return this
     }
 
     catch(callback) {
         this.data.catch = callback
-        return this
     }
 
     finally(callback) {
         this.data.finally = callback
-        return this
     }
 
     /*
@@ -58,10 +76,10 @@ class RequestDecorator {
         return new Promise(resolve => {
             const interval = setInterval(() => {
                 if (this.data.statusCode) {
-                    resolve({result: this.data.result, statusCode: this.data.statusCode})
                     clearInterval(interval)
+                    setTimeout(() => resolve({result: this.data.result, statusCode: this.data.statusCode}), 10)
                 }
-            }, 100)
+            }, 1)
         })
     }
 

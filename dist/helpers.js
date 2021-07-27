@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.mergeDeep = void 0;
+exports.proxy = exports.mergeDeep = void 0;
 
 var mergeDeep = function mergeDeep(target, source) {
   var isObject = function isObject(obj) {
@@ -30,3 +30,20 @@ var mergeDeep = function mergeDeep(target, source) {
 };
 
 exports.mergeDeep = mergeDeep;
+
+var proxy = function proxy(state, publicProps, handler) {
+  return new Proxy(state, {
+    get: function get(instance, prop) {
+      if (instance.hasOwnProperty(prop) && Array.isArray(publicProps) && publicProps.includes(prop)) return instance[prop];
+      return function () {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return handler && handler(instance, prop, args);
+      };
+    }
+  });
+};
+
+exports.proxy = proxy;

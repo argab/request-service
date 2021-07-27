@@ -67,10 +67,7 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "dispatch",
     value: function dispatch(request) {
-      if (false === request instanceof _Decorators.RequestDecorator) {
-        return;
-      }
-
+      if (false === request instanceof _Decorators.RequestDecorator) return;
       var client = this.getClient(request.data);
       client[request.data.method] instanceof Function && this.resolveClient(client, request);
       return request;
@@ -98,7 +95,7 @@ var RequestFactory = /*#__PURE__*/function () {
       var result = undefined;
       handlers.forEach(function (handler) {
         if (handler[action] instanceof Function) {
-          var _data = handler[action](_data);
+          var _data = handler[action](data);
 
           _data === undefined || (result = _data);
         }

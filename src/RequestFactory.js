@@ -28,9 +28,8 @@ class RequestFactory {
     }
 
     dispatch(request) {
-        if (false === (request instanceof RequestDecorator)) {
-            return
-        }
+        if (false === (request instanceof RequestDecorator)) return
+
         const client = this.getClient(request.data)
         client[request.data.method] instanceof Function && this.resolveClient(client, request)
 
@@ -60,8 +59,8 @@ class RequestFactory {
 
         handlers.forEach(handler => {
             if (handler[action] instanceof Function) {
-                const data = handler[action](data)
-                data === undefined || (result = data)
+                const _data = handler[action](data)
+                _data === undefined || (result = _data)
             }
         })
 

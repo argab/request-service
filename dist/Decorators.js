@@ -17,6 +17,8 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _helpers = require("./helpers");
+
 var ClientDecorator = /*#__PURE__*/function () {
   function ClientDecorator() {
     (0, _classCallCheck2["default"])(this, ClientDecorator);
@@ -137,38 +139,60 @@ var RequestDecorator = /*#__PURE__*/function () {
   function RequestDecorator(data) {
     (0, _classCallCheck2["default"])(this, RequestDecorator);
     (0, _defineProperty2["default"])(this, "data", {});
+    (0, _defineProperty2["default"])(this, "_chain", []);
     this.data = data;
+
+    var _proxy = function _proxy(state) {
+      return (0, _helpers.proxy)(state, ['data'], function (state, method, args) {
+        if (method === 'chainPush') return state.chainPush(args[0]);
+        state.chainPush({
+          method: method,
+          args: args
+        });
+        if (method === 'await') return state["await"]();
+        state[method](args[0], args[1], args[2], args[3]);
+        return _proxy(state);
+      });
+    };
+
+    return _proxy(this);
   }
 
   (0, _createClass2["default"])(RequestDecorator, [{
+    key: "chainPush",
+    value: function chainPush(_ref) {
+      var method = _ref.method,
+          args = _ref.args;
+
+      this._chain.push({
+        method: method,
+        args: args
+      });
+    }
+  }, {
     key: "success",
     value: function success(callback) {
       this.data.success = callback;
-      return this;
     }
   }, {
     key: "then",
     value: function then(callback) {
       this.data.success = callback;
-      return this;
     }
   }, {
     key: "error",
     value: function error(callback) {
       this.data.error = callback;
-      return this;
     }
   }, {
     key: "catch",
     value: function _catch(callback) {
       this.data["catch"] = callback;
-      return this;
     }
   }, {
     key: "finally",
     value: function _finally(callback) {
       this.data["finally"] = callback;
-      return this;
     }
     /*
     * This method should be called at the end as it returns a new Promise.
@@ -183,13 +207,15 @@ var RequestDecorator = /*#__PURE__*/function () {
       return new Promise(function (resolve) {
         var interval = setInterval(function () {
           if (_this.data.statusCode) {
-            resolve({
-              result: _this.data.result,
-              statusCode: _this.data.statusCode
-            });
             clearInterval(interval);
+            setTimeout(function () {
+              return resolve({
+                result: _this.data.result,
+                statusCode: _this.data.statusCode
+              });
+            }, 10);
           }
-        }, 100);
+        }, 1);
       });
     }
   }]);

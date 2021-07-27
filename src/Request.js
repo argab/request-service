@@ -87,18 +87,15 @@ class Request extends AbstractRequest {
         return this._requests
     }
 
-    _proxy(stagedData) {
+    _proxy(stagedData, chain) {
         return new Proxy(this, {
             get: function (Req, method) {
-                return function (...props) {
+                return function (...args) {
 
-                    if (method === 'getLog') return Req.getLog()
-
-                    if (method === 'repo') return Req.repo(props[0])
-
-                    if (method === 'stub') return Req.stub(props[0])
+                    if (Req[method] instanceof Function) return Req[method](args[0])
 
                     stagedData instanceof Object || (stagedData = {})
+                    Array.isArray(chain) || (chain = [])
 
                     if (RequestMediator.isPrototypeOf(Req._mediator)) {
                         const extend = Req._extend.mediator
@@ -107,8 +104,9 @@ class Request extends AbstractRequest {
                         })
                         if (Req._mediator.prototype[method] instanceof Function) {
                             const mediator = new Req._mediator(stagedData)
-                            mediator[method](props[0])
-                            return Req._proxy(mediator.staged)
+                            mediator[method](args[0], args[1], args[2], args[3])
+                            chain.push({method, args})
+                            return Req._proxy(mediator.staged, chain)
                         }
                     }
 
@@ -117,19 +115,19 @@ class Request extends AbstractRequest {
                     const factory = new Req._factory(stagedData)
 
                     if (factory instanceof RequestFactory && factory._client.prototype[method] instanceof Function) {
-                        const data = {...Req._config}
-                        const uri = props[0]
-                        const params = props[1]
-                        const config = props[2] instanceof Object ? props[2] : {}
+                        const uri = args[0]
+                        const params = args[1]
                         const request = factory.create({
                             method,
                             uri,
                             params,
-                            config: mergeDeep(data, mergeDeep(config, stagedData))
+                            config: mergeDeep({...Req._config}, stagedData)
                         })
 
-                        request.data.log && Req._requests.push(request)
+                        chain.push({method, args})
+                        chain.forEach(item => request.chainPush(item))
 
+                        request.data.log && Req._requests.push(request)
                         return factory.dispatch(request)
                     }
                 }

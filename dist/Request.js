@@ -148,14 +148,17 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
     }
   }, {
     key: "_proxy",
-    value: function _proxy(stagedData) {
+    value: function _proxy(stagedData, chain) {
       return new Proxy(this, {
         get: function get(Req, method) {
           return function () {
-            if (method === 'getLog') return Req.getLog();
-            if (method === 'repo') return Req.repo(arguments.length <= 0 ? undefined : arguments[0]);
-            if (method === 'stub') return Req.stub(arguments.length <= 0 ? undefined : arguments[0]);
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            if (Req[method] instanceof Function) return Req[method](args[0]);
             stagedData instanceof Object || (stagedData = {});
+            Array.isArray(chain) || (chain = []);
 
             if (_Mediators.RequestMediator.isPrototypeOf(Req._mediator)) {
               var extend = Req._extend.mediator;
@@ -165,8 +168,12 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
 
               if (Req._mediator.prototype[method] instanceof Function) {
                 var mediator = new Req._mediator(stagedData);
-                mediator[method](arguments.length <= 0 ? undefined : arguments[0]);
-                return Req._proxy(mediator.staged);
+                mediator[method](args[0], args[1], args[2], args[3]);
+                chain.push({
+                  method: method,
+                  args: args
+                });
+                return Req._proxy(mediator.staged, chain);
               }
             }
 
@@ -178,14 +185,20 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
             if (factory instanceof _RequestFactory.RequestFactory && factory._client.prototype[method] instanceof Function) {
               var data = _objectSpread({}, Req._config);
 
-              var uri = arguments.length <= 0 ? undefined : arguments[0];
-              var params = arguments.length <= 1 ? undefined : arguments[1];
-              var config = (arguments.length <= 2 ? undefined : arguments[2]) instanceof Object ? arguments.length <= 2 ? undefined : arguments[2] : {};
+              var uri = args[0];
+              var params = args[1];
               var request = factory.create({
                 method: method,
                 uri: uri,
                 params: params,
-                config: (0, _helpers.mergeDeep)(data, (0, _helpers.mergeDeep)(config, stagedData))
+                config: (0, _helpers.mergeDeep)(data, stagedData)
+              });
+              chain.push({
+                method: method,
+                args: args
+              });
+              chain.forEach(function (item) {
+                return request.chainPush(item);
               });
               request.data.log && Req._requests.push(request);
               return factory.dispatch(request);

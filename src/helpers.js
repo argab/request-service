@@ -1,5 +1,5 @@
 
-export const mergeDeep = (target, source) => {
+export const mergeDeep = function (target, source) {
     const isObject = (obj) => obj && obj instanceof Object
     if (!isObject(target) || !isObject(source)) {
         return source
@@ -19,4 +19,16 @@ export const mergeDeep = (target, source) => {
     })
 
     return target
+}
+
+export const proxy = function (state, publicProps, handler) {
+    return new Proxy(state, {
+        get: function (instance, prop) {
+            if (instance.hasOwnProperty(prop) && Array.isArray(publicProps) && publicProps.includes(prop))
+                return instance[prop]
+            return function (...args) {
+                return handler && handler(instance, prop, args)
+            }
+        }
+    })
 }
