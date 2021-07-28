@@ -9,6 +9,8 @@ exports.ClientDecorator = exports.RequestDecorator = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
@@ -144,13 +146,13 @@ var RequestDecorator = /*#__PURE__*/function () {
 
     var _proxy = function _proxy(state) {
       return (0, _helpers.proxy)(state, ['data'], function (state, method, args) {
-        if (method === 'chainPush') return state.chainPush(args[0]);
+        if (['chainPush', 'getChain'].includes(method)) return state[method](args[0]);
         state.chainPush({
           method: method,
           args: args
         });
         if (method === 'await') return state["await"]();
-        state[method](args[0], args[1], args[2], args[3]);
+        state[method] instanceof Function && state[method](args[0], args[1], args[2], args[3]);
         return _proxy(state);
       });
     };
@@ -168,6 +170,11 @@ var RequestDecorator = /*#__PURE__*/function () {
         method: method,
         args: args
       });
+    }
+  }, {
+    key: "getChain",
+    value: function getChain() {
+      return (0, _toConsumableArray2["default"])(this._chain);
     }
   }, {
     key: "success",

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.proxy = exports.mergeDeep = void 0;
+exports.isPrototype = exports.proxy = exports.mergeDeep = void 0;
 
 var mergeDeep = function mergeDeep(target, source) {
   var isObject = function isObject(obj) {
@@ -47,3 +47,9 @@ var proxy = function proxy(state, publicProps, handler) {
 };
 
 exports.proxy = proxy;
+
+var isPrototype = function isPrototype(state, target) {
+  return (state === null || state === void 0 ? void 0 : state.isPrototypeOf(target)) || (state === null || state === void 0 ? void 0 : state.prototype) && state.prototype === (target === null || target === void 0 ? void 0 : target.prototype);
+};
+
+exports.isPrototype = isPrototype;

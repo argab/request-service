@@ -19,6 +19,8 @@ var _Interfaces = require("./Interfaces");
 
 var _Request = require("./Request");
 
+var _helpers = require("./helpers");
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -34,10 +36,10 @@ var RequestFactory = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_client", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
     (0, _defineProperty2["default"])(this, "_requestService", void 0);
-    this._handler = _Interfaces.RequestHandler.isPrototypeOf(handler) ? handler : _Interfaces.RequestHandler;
-    this._client = _Decorators.ClientDecorator.isPrototypeOf(client) ? client : _Decorators.ClientDecorator;
-    this._request = _Decorators.RequestDecorator.isPrototypeOf(requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
-    _Request.AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService)) && (this._requestService = requestService);
+    this._handler = (0, _helpers.isPrototype)(_Interfaces.RequestHandler, handler) ? handler : _Interfaces.RequestHandler;
+    this._client = (0, _helpers.isPrototype)(_Decorators.ClientDecorator, client) ? client : _Decorators.ClientDecorator;
+    this._request = (0, _helpers.isPrototype)(_Decorators.RequestDecorator, requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
+    _Request.AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService || {})) && (this._requestService = requestService);
   }
 
   (0, _createClass2["default"])(RequestFactory, [{
@@ -52,7 +54,8 @@ var RequestFactory = /*#__PURE__*/function () {
       config instanceof Object || (config = {});
 
       if (this._requestService) {
-        var extend = this._requestService._extend.request;
+        var extend = this._requestService["extends"]().request;
+
         extend instanceof Object && Object.keys(extend).forEach(function (key) {
           return _this._request.prototype[key] = extend[key];
         });
@@ -75,7 +78,7 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "getClient",
     value: function getClient(data) {
-      var client = _Decorators.ClientDecorator.isPrototypeOf(data.client) ? data.client : this._client;
+      var client = (0, _helpers.isPrototype)(_Decorators.ClientDecorator, data.client) ? data.client : this._client;
       return new client(data);
     }
   }, {
@@ -85,7 +88,7 @@ var RequestFactory = /*#__PURE__*/function () {
       var handlers = data.handler || this._handler;
       Array.isArray(handlers) || (handlers = [handlers]);
       handlers.forEach(function (handler) {
-        (_Interfaces.RequestHandler.isPrototypeOf(handler) || _Interfaces.RequestHandler.prototype === handler.prototype) && output.push(new handler(data));
+        return (0, _helpers.isPrototype)(_Interfaces.RequestHandler, handler) && output.push(new handler(data));
       });
       return output;
     }
@@ -116,12 +119,12 @@ var RequestFactory = /*#__PURE__*/function () {
           return res(dataClient);
         }, 100);
       });
-      var Loader = request.data.useLoader && (_Interfaces.RequestLoader.isPrototypeOf(request.data.loader) || _Interfaces.RequestLoader.prototype === request.data.loader.prototype) ? new request.data.loader(request.data) : null;
+      var Loader = request.data.useLoader && (0, _helpers.isPrototype)(_Interfaces.RequestLoader, request.data.loader) ? new request.data.loader(request.data) : null;
 
       var getLoader = function getLoader() {
         var _this2$_requestServic;
 
-        Loader && (Loader.pending = (_this2$_requestServic = _this2._requestService) === null || _this2$_requestServic === void 0 ? void 0 : _this2$_requestServic._requests.filter(function (r) {
+        Loader && (Loader.pending = (_this2$_requestServic = _this2._requestService) === null || _this2$_requestServic === void 0 ? void 0 : _this2$_requestServic.getLog().filter(function (r) {
           return r.data.useLoader && !r.data.statusCode;
         }).length);
         return Loader;
@@ -176,6 +179,7 @@ var RequestFactory = /*#__PURE__*/function () {
         }
       } else {
         this.setRequestResult(request, this.resolveHandlers(error, handlers, 'onCatch'));
+        request.data.dataError = error;
       }
     }
   }, {

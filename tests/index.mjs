@@ -1,8 +1,9 @@
-import axios from 'axios'
+import axios from 'axios';
+import {format as prettyFormat} from 'pretty-format';
 
 import {Request, RequestLoader, ClientDecorator, RequestHandler} from '../dist/index.js'
 import RepoPosts from './repo/posts.mjs';
-import PostsStub from './stubs/posts.mjs';
+import RepoComments from './stubs/comments.mjs';
 
 const _axios = (config) => axios.create(config);
 
@@ -97,15 +98,15 @@ class App {
     }
 
     getPostsRepo() {
-        return this.request.unlog().repo('posts').getPosts().then(response => {
+        return this.request.repo('posts').getPosts().then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
             throw 'Checking ApiHandler.'
         }).await()
     }
 
-    getPostsStub() {
-        return this.request.unlog().stub('posts').getPosts().then(response => {
-            console.log('posts: ',  JSON.stringify(response.data))
+    getCommentsStub() {
+        return this.request.stub('comments').getComments().then(response => {
+            console.log('comments STUB: ',  JSON.stringify(response.data))
         }).catch(err => console.error(err)).await()
     }
 }
@@ -114,11 +115,11 @@ App.prototype.request = new Request({
 
     getRepo: (path) => {
         console.log(path)
-        return new RepoPosts()
+        return new RepoPosts
     },
     getStub: (path) => {
         console.log(path)
-        return new PostsStub()
+        return path === 'posts' ? new RepoPosts : new RepoComments
     },
 
     useStubs: true,
@@ -135,7 +136,13 @@ App.prototype.request = new Request({
                 console.log('This is my awesome mediator function!')
 
                 this.config({headers: {'X-AwesomeHeader': 'v1.0.0'}})
-            }
+            },
+            test1: function () {
+                this.config({headers: {'X-TestHeader-1': 'v1.0.0'}})
+            },
+            test2: function () {
+                this.config({headers: {'X-TestHeader-2': 'v1.0.0'}})
+            },
         },
         request: {
             done: function (messageOnSuccess) {
@@ -163,12 +170,17 @@ const app = new App();
 
     await app.getPostsRepo();
 
-    await app.getPostsStub();
+    await app.getCommentsStub();
 
     const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await();
 
+    const log = app.request.getLog()
     console.log(result)
-    console.log('requests logged number: ', app.request.getLog().length)
+    console.log('requests logged number: ', log.length)
+
+    const chain = []
+    log.forEach(r => chain.push(r.getChain().map(i => i.method)))
+    console.log(prettyFormat(chain))
 
 })();
 

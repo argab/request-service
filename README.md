@@ -127,7 +127,7 @@ this.request
     .html() // Similar to .headers({'Accept': 'text/html'})
     
     // Client Decorator (required):
-    .post('http://some.url', {parameters}, {optionalConfig})
+    .post('http://some.url', {parameters})
     
     // Request Decorators (optional):
     .success(response => {}) // or .then(...)
@@ -305,13 +305,11 @@ MyApp.prototype.request = new Request({
                 console.log(`This is what my ApiHandler would notify about at response success: `, messageOnSuccess)
     
                 this.data.done = messageOnSuccess
-                return this
             },
             alert: function (messageOnError) {
                 console.log(`This is what my ApiHandler would notify about at response error: `, messageOnError)
     
                 this.data.alert = messageOnError
-                return this
             }
         }
   }

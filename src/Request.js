@@ -1,7 +1,7 @@
-import {RequestRepository} from "./Interfaces"
 import {RequestFactory} from "./RequestFactory"
 import {RequestMediator, RequestMediatorDecorator} from "./Mediators"
-import {mergeDeep} from "./helpers"
+import {RequestRepository} from "./Interfaces"
+import {proxy, isPrototype} from "./helpers"
 
 class AbstractRequest {
 
@@ -47,6 +47,12 @@ class AbstractRequest {
     getLog() {
     }
 
+    log() {
+    }
+
+    extends() {
+    }
+
 }
 
 class Request extends AbstractRequest {
@@ -56,83 +62,56 @@ class Request extends AbstractRequest {
         this._getRepo = getRepo instanceof Function ? getRepo : () => null
         this._getStub = getStub instanceof Function ? getStub : () => null
         this._useStubs = Boolean(useStubs)
-        this._factory = RequestFactory.isPrototypeOf(factory) ? factory : RequestFactory
-        this._mediator = RequestMediator.isPrototypeOf(mediator) ? mediator : RequestMediatorDecorator
+        this._factory = isPrototype(RequestFactory, factory) ? factory : RequestFactory
+        this._mediator = isPrototype(RequestMediator, mediator) ? mediator : RequestMediatorDecorator
 
         config instanceof Object && Object.assign(this._config, config)
         extend instanceof Object && Object.assign(this._extend, extend)
 
-        return this._proxy()
+        return proxy(this, null, (state, method, args) => {
+
+            const extend = state.extends().mediator
+            extend instanceof Object && Object.keys(extend).forEach(key => {
+                state._mediator.prototype[key] = extend[key]
+            })
+
+            if (['repo', 'stub'].includes(method)) {
+                const Repo = state[method](args[0])
+                Repo instanceof RequestRepository && (Repo.client = new state._mediator(state, state._factory))
+                return Repo
+            }
+
+            if (state[method] instanceof Function) return state[method](args[0])
+
+            if (state._mediator.prototype[method] instanceof Function) {
+                const mediator = new state._mediator(state, state._factory)
+                return mediator[method](args[0], args[1], args[2], args[3])
+            }
+        })
     }
 
     repo(path) {
         if (this._useStubs) {
             const stub = this.stub(path)
-            if (stub) {
-                return stub
-            }
+            if (stub) return stub
         }
-        const repo = this._getRepo(path)
-        repo instanceof RequestRepository && (repo.client = this._proxy())
-        return repo
+        return this._getRepo(path)
     }
 
     stub(path) {
-        const repo = this._getStub(path)
-        repo instanceof RequestRepository && (repo.client = this._proxy())
-        return repo
+        return this._getStub(path)
     }
 
     getLog() {
         return this._requests
     }
 
-    _proxy(stagedData, chain) {
-        return new Proxy(this, {
-            get: function (Req, method) {
-                return function (...args) {
+    log(request) {
+        this._requests.push(request)
+    }
 
-                    if (Req[method] instanceof Function) return Req[method](args[0])
-
-                    stagedData instanceof Object || (stagedData = {})
-                    Array.isArray(chain) || (chain = [])
-
-                    if (RequestMediator.isPrototypeOf(Req._mediator)) {
-                        const extend = Req._extend.mediator
-                        extend instanceof Object && Object.keys(extend).forEach(key => {
-                            Req._mediator.prototype[key] = extend[key]
-                        })
-                        if (Req._mediator.prototype[method] instanceof Function) {
-                            const mediator = new Req._mediator(stagedData)
-                            mediator[method](args[0], args[1], args[2], args[3])
-                            chain.push({method, args})
-                            return Req._proxy(mediator.staged, chain)
-                        }
-                    }
-
-                    stagedData.requestService || Object.assign(stagedData, {requestService: Req})
-
-                    const factory = new Req._factory(stagedData)
-
-                    if (factory instanceof RequestFactory && factory._client.prototype[method] instanceof Function) {
-                        const uri = args[0]
-                        const params = args[1]
-                        const request = factory.create({
-                            method,
-                            uri,
-                            params,
-                            config: mergeDeep({...Req._config}, stagedData)
-                        })
-
-                        chain.push({method, args})
-                        chain.forEach(item => request.chainPush(item))
-
-                        request.data.log && Req._requests.push(request)
-                        return factory.dispatch(request)
-                    }
-                }
-            }
-        })
+    extends() {
+        return {...this._extend}
     }
 }
 

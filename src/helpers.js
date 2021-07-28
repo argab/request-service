@@ -32,3 +32,7 @@ export const proxy = function (state, publicProps, handler) {
         }
     })
 }
+
+export const isPrototype = function (state, target) {
+    return state?.isPrototypeOf(target) || (state?.prototype && state.prototype === target?.prototype)
+}

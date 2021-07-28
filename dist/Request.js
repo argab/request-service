@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.AbstractRequest = exports.Request = void 0;
 
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
@@ -19,11 +21,11 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-var _Interfaces = require("./Interfaces");
-
 var _RequestFactory = require("./RequestFactory");
 
 var _Mediators = require("./Mediators");
+
+var _Interfaces = require("./Interfaces");
 
 var _helpers = require("./helpers");
 
@@ -80,6 +82,12 @@ var AbstractRequest = /*#__PURE__*/function () {
   }, {
     key: "getLog",
     value: function getLog() {}
+  }, {
+    key: "log",
+    value: function log() {}
+  }, {
+    key: "extends",
+    value: function _extends() {}
   }]);
   return AbstractRequest;
 }();
@@ -110,11 +118,30 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
       return null;
     };
     _this._useStubs = Boolean(useStubs);
-    _this._factory = _RequestFactory.RequestFactory.isPrototypeOf(factory) ? factory : _RequestFactory.RequestFactory;
-    _this._mediator = _Mediators.RequestMediator.isPrototypeOf(mediator) ? mediator : _Mediators.RequestMediatorDecorator;
+    _this._factory = (0, _helpers.isPrototype)(_RequestFactory.RequestFactory, factory) ? factory : _RequestFactory.RequestFactory;
+    _this._mediator = (0, _helpers.isPrototype)(_Mediators.RequestMediator, mediator) ? mediator : _Mediators.RequestMediatorDecorator;
     config instanceof Object && Object.assign(_this._config, config);
     extend instanceof Object && Object.assign(_this._extend, extend);
-    return (0, _possibleConstructorReturn2["default"])(_this, _this._proxy());
+    return (0, _possibleConstructorReturn2["default"])(_this, (0, _helpers.proxy)((0, _assertThisInitialized2["default"])(_this), null, function (state, method, args) {
+      var extend = state["extends"]().mediator;
+      extend instanceof Object && Object.keys(extend).forEach(function (key) {
+        state._mediator.prototype[key] = extend[key];
+      });
+
+      if (['repo', 'stub'].includes(method)) {
+        var Repo = state[method](args[0]);
+        Repo instanceof _Interfaces.RequestRepository && (Repo.client = new state._mediator(state, state._factory));
+        return Repo;
+      }
+
+      if (state[method] instanceof Function) return state[method](args[0]);
+
+      if (state._mediator.prototype[method] instanceof Function) {
+        var _mediator = new state._mediator(state, state._factory);
+
+        return _mediator[method](args[0], args[1], args[2], args[3]);
+      }
+    }));
   }
 
   (0, _createClass2["default"])(Request, [{
@@ -122,24 +149,15 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
     value: function repo(path) {
       if (this._useStubs) {
         var stub = this.stub(path);
-
-        if (stub) {
-          return stub;
-        }
+        if (stub) return stub;
       }
 
-      var repo = this._getRepo(path);
-
-      repo instanceof _Interfaces.RequestRepository && (repo.client = this._proxy());
-      return repo;
+      return this._getRepo(path);
     }
   }, {
     key: "stub",
     value: function stub(path) {
-      var repo = this._getStub(path);
-
-      repo instanceof _Interfaces.RequestRepository && (repo.client = this._proxy());
-      return repo;
+      return this._getStub(path);
     }
   }, {
     key: "getLog",
@@ -147,65 +165,14 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
       return this._requests;
     }
   }, {
-    key: "_proxy",
-    value: function _proxy(stagedData, chain) {
-      return new Proxy(this, {
-        get: function get(Req, method) {
-          return function () {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            if (Req[method] instanceof Function) return Req[method](args[0]);
-            stagedData instanceof Object || (stagedData = {});
-            Array.isArray(chain) || (chain = []);
-
-            if (_Mediators.RequestMediator.isPrototypeOf(Req._mediator)) {
-              var extend = Req._extend.mediator;
-              extend instanceof Object && Object.keys(extend).forEach(function (key) {
-                Req._mediator.prototype[key] = extend[key];
-              });
-
-              if (Req._mediator.prototype[method] instanceof Function) {
-                var mediator = new Req._mediator(stagedData);
-                mediator[method](args[0], args[1], args[2], args[3]);
-                chain.push({
-                  method: method,
-                  args: args
-                });
-                return Req._proxy(mediator.staged, chain);
-              }
-            }
-
-            stagedData.requestService || Object.assign(stagedData, {
-              requestService: Req
-            });
-            var factory = new Req._factory(stagedData);
-
-            if (factory instanceof _RequestFactory.RequestFactory && factory._client.prototype[method] instanceof Function) {
-              var data = _objectSpread({}, Req._config);
-
-              var uri = args[0];
-              var params = args[1];
-              var request = factory.create({
-                method: method,
-                uri: uri,
-                params: params,
-                config: (0, _helpers.mergeDeep)(data, stagedData)
-              });
-              chain.push({
-                method: method,
-                args: args
-              });
-              chain.forEach(function (item) {
-                return request.chainPush(item);
-              });
-              request.data.log && Req._requests.push(request);
-              return factory.dispatch(request);
-            }
-          };
-        }
-      });
+    key: "log",
+    value: function log(request) {
+      this._requests.push(request);
+    }
+  }, {
+    key: "extends",
+    value: function _extends() {
+      return _objectSpread({}, this._extend);
     }
   }]);
   return Request;

@@ -26,17 +26,18 @@ class RequestDecorator {
     _chain = []
 
     constructor(data) {
+
         this.data = data
 
         const _proxy = (state) => proxy(state, ['data'], (state, method, args) => {
 
-            if (method === 'chainPush') return state.chainPush(args[0])
+            if (['chainPush', 'getChain'].includes(method)) return state[method](args[0])
 
             state.chainPush({method, args})
 
             if (method === 'await') return state.await()
 
-            state[method](args[0], args[1], args[2], args[3])
+            state[method] instanceof Function && state[method](args[0], args[1], args[2], args[3])
 
             return _proxy(state)
         })
@@ -46,6 +47,10 @@ class RequestDecorator {
 
     chainPush({method, args}) {
         this._chain.push({method, args})
+    }
+
+    getChain() {
+        return [...this._chain]
     }
 
     success(callback) {

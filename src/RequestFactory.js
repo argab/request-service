@@ -1,6 +1,7 @@
 import {ClientDecorator, RequestDecorator} from "./Decorators"
 import {RequestHandler, RequestLoader} from "./Interfaces"
 import {AbstractRequest} from "./Request"
+import {isPrototype} from "./helpers"
 
 class RequestFactory {
 
@@ -10,17 +11,18 @@ class RequestFactory {
     _requestService
 
     constructor({client, handler, requestDecorator, requestService}) {
-        this._handler = RequestHandler.isPrototypeOf(handler) ? handler : RequestHandler
-        this._client = ClientDecorator.isPrototypeOf(client) ? client : ClientDecorator
-        this._request = RequestDecorator.isPrototypeOf(requestDecorator) ? requestDecorator : RequestDecorator
-        AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService)) && (this._requestService = requestService)
+        this._handler = isPrototype(RequestHandler, handler) ? handler : RequestHandler
+        this._client = isPrototype(ClientDecorator, client) ? client : ClientDecorator
+        this._request = isPrototype(RequestDecorator, requestDecorator) ? requestDecorator : RequestDecorator
+
+        AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(requestService || {})) && (this._requestService = requestService)
     }
 
     create({method, uri, params, config}) {
         config instanceof Object || (config = {})
 
         if (this._requestService) {
-            const extend = this._requestService._extend.request
+            const extend = this._requestService.extends().request
             extend instanceof Object && Object.keys(extend).forEach(key => this._request.prototype[key] = extend[key])
         }
 
@@ -37,18 +39,16 @@ class RequestFactory {
     }
 
     getClient(data) {
-        const client = ClientDecorator.isPrototypeOf(data.client) ? data.client : this._client
+        const client = isPrototype(ClientDecorator, data.client) ? data.client : this._client
         return new client(data)
     }
 
     getHandlers(data) {
         const output = []
+
         let handlers = data.handler || this._handler
         Array.isArray(handlers) || (handlers = [handlers])
-
-        handlers.forEach(handler => {
-            (RequestHandler.isPrototypeOf(handler) || RequestHandler.prototype === handler.prototype) && output.push(new handler(data))
-        })
+        handlers.forEach(handler => isPrototype(RequestHandler, handler) && output.push(new handler(data)))
 
         return output
     }
@@ -74,12 +74,13 @@ class RequestFactory {
 
         const dataClient = request.data.stubData || client[request.data.method](request.data)
         const promise = dataClient instanceof Promise
-            ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
-        const Loader = (request.data.useLoader
-            && (RequestLoader.isPrototypeOf(request.data.loader) || RequestLoader.prototype === request.data.loader.prototype))
-            ? new request.data.loader(request.data) : null
+            ? dataClient
+            : new Promise(res => setTimeout(() => res(dataClient), 100))
+        const Loader = request.data.useLoader && isPrototype(RequestLoader, request.data.loader)
+            ? new request.data.loader(request.data)
+            : null
         const getLoader = () => {
-            Loader && (Loader.pending = this._requestService?._requests.filter(r => r.data.useLoader && !r.data.statusCode).length)
+            Loader && (Loader.pending = this._requestService?.getLog().filter(r => r.data.useLoader && !r.data.statusCode).length)
             return Loader
         }
 
@@ -135,6 +136,7 @@ class RequestFactory {
             }
         } else {
             this.setRequestResult(request, this.resolveHandlers(error, handlers, 'onCatch'))
+            request.data.dataError = error
         }
     }
 
