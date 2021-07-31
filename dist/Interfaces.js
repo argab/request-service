@@ -47,17 +47,17 @@ var RequestHandler = /*#__PURE__*/function () {
     key: "isSuccess",
     value:
     /*
-    * request checking method
+    * response checking method
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
-    * @return Boolean on Success
+    * @param: incoming response data
+    * @return: Boolean
     * */
     function isSuccess() {}
     /*
-    * request checking method
+    * response checking method
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
-    * @return Boolean on Error
+    * @param: incoming response data
+    * @return: Boolean
     * */
 
   }, {
@@ -74,7 +74,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function onSuccess() {}
     /*
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
+    * @param: incoming response data
     * @return: void
     * */
 
@@ -83,7 +83,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function onError() {}
     /*
     * method executes within a Promise.prototype.catch()
-    * @params: error
+    * @param: error
     * @return: void
     * */
 
@@ -92,7 +92,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function onCatch() {}
     /*
     * method executes within a Promise.prototype.finally()
-    * @params: request data
+    * @param: request data
     * @return: void
     * */
 
@@ -101,7 +101,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function onFinally() {}
     /*
     * method executes before request sent
-    * @params: request data
+    * @param: request data
     * @return: void
     * */
 
@@ -110,7 +110,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function before() {}
     /*
     * method executes at the start of a Promise.prototype.then()
-    * @params: response
+    * @param: response
     * @return: void
     * */
 
@@ -119,7 +119,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function after() {}
     /*
     * method executes at the start of a Promise.prototype.catch()
-    * @params: error
+    * @param: error
     * @return: void
     * */
 
@@ -128,7 +128,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function afterCatch() {}
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @params: request data
+    * @params request data
     * @return: void
     * */
 

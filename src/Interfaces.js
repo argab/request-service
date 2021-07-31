@@ -25,19 +25,19 @@ class RequestLoader {
 class RequestHandler {
 
     /*
-    * request checking method
+    * response checking method
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
-    * @return Boolean on Success
+    * @param: incoming response data
+    * @return: Boolean
     * */
     isSuccess() {
     }
 
     /*
-    * request checking method
+    * response checking method
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
-    * @return Boolean on Error
+    * @param: incoming response data
+    * @return: Boolean
     * */
     isError() {
     }
@@ -52,7 +52,7 @@ class RequestHandler {
 
     /*
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
+    * @param: incoming response data
     * @return: void
     * */
     onError() {
@@ -60,7 +60,7 @@ class RequestHandler {
 
     /*
     * method executes within a Promise.prototype.catch()
-    * @params: error
+    * @param: error
     * @return: void
     * */
     onCatch() {
@@ -68,7 +68,7 @@ class RequestHandler {
 
     /*
     * method executes within a Promise.prototype.finally()
-    * @params: request data
+    * @param: request data
     * @return: void
     * */
     onFinally() {
@@ -76,7 +76,7 @@ class RequestHandler {
 
     /*
     * method executes before request sent
-    * @params: request data
+    * @param: request data
     * @return: void
     * */
     before() {
@@ -84,7 +84,7 @@ class RequestHandler {
 
     /*
     * method executes at the start of a Promise.prototype.then()
-    * @params: response
+    * @param: response
     * @return: void
     * */
     after() {
@@ -92,7 +92,7 @@ class RequestHandler {
 
     /*
     * method executes at the start of a Promise.prototype.catch()
-    * @params: error
+    * @param: error
     * @return: void
     * */
     afterCatch() {
@@ -100,7 +100,7 @@ class RequestHandler {
 
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @params: request data
+    * @params request data
     * @return: void
     * */
     afterFinally() {

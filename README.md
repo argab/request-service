@@ -4,7 +4,7 @@ Provides a fully customizable Library for handling API using Request repositorie
 
 ## Initialisation
 
-1. Create your own Request client ES-6 class extending "ClientDecorator" from the package.
+1. Create your own Request client ES-6 classes extending "ClientDecorator" and "RequestHandler" from the package.
 
 ```javascript
 //.......... ApiClient.js
@@ -44,34 +44,86 @@ import {RequestHandler} from '@argab/request-service'
 
 export default class extends RequestHandler {
 
-    isSuccess(response) {
+    /*
+    * response checking method
+    * method executes within a Promise.prototype.then()
+    * @param: incoming response data
+    * @return: Boolean
+    * */
+    isSuccess() {
     }
-    
-    isError(response) {
+
+    /*
+    * response checking method
+    * method executes within a Promise.prototype.then()
+    * @param: incoming response data
+    * @return: Boolean
+    * */
+    isError() {
     }
-    
-    onSuccess(response) {
+
+    /*
+    * method executes within a Promise.prototype.then()
+    * @params: incoming response data
+    * @return: void
+    * */
+    onSuccess() {
     }
-    
-    onError(response) {
+
+    /*
+    * method executes within a Promise.prototype.then()
+    * @param: incoming response data
+    * @return: void
+    * */
+    onError() {
     }
-    
-    onCatch(error) {
+
+    /*
+    * method executes within a Promise.prototype.catch()
+    * @param: error
+    * @return: void
+    * */
+    onCatch() {
     }
-    
-    onFinally(requestData) {
+
+    /*
+    * method executes within a Promise.prototype.finally()
+    * @param: request data
+    * @return: void
+    * */
+    onFinally() {
     }
-    
-    before(requestData) {
+
+    /*
+    * method executes before request sent
+    * @param: request data
+    * @return: void
+    * */
+    before() {
     }
-    
-    after(response) {
+
+    /*
+    * method executes at the start of a Promise.prototype.then()
+    * @param: response
+    * @return: void
+    * */
+    after() {
     }
-    
-    afterCatch(error) {
+
+    /*
+    * method executes at the start of a Promise.prototype.catch()
+    * @param: error
+    * @return: void
+    * */
+    afterCatch() {
     }
-    
-    afterFinally(requestData) {
+
+    /*
+    * method executes at the start of a Promise.prototype.finally()
+    * @params request data
+    * @return: void
+    * */
+    afterFinally() {
     }
 }
 
