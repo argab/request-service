@@ -55,9 +55,7 @@ var RequestMediator = /*#__PURE__*/function () {
 
         if (['repo', 'stub'].includes(method)) {
           var Repo = Service[method](args[0], args[1], args[2], args[3]);
-          Repo instanceof _Interfaces.RequestRepository && (Repo.client = new Service._mediator(Service, Factory));
-          Repo.client._staged = staged;
-          Repo.client._chain = state._chain;
+          Repo instanceof _Interfaces.RequestRepository && (Repo.client = _proxy(state));
           return Repo;
         }
 

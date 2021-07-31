@@ -29,9 +29,7 @@ class RequestMediator {
 
             if (['repo', 'stub'].includes(method)) {
                 const Repo = Service[method](args[0], args[1], args[2], args[3])
-                Repo instanceof RequestRepository && (Repo.client = new Service._mediator(Service, Factory))
-                Repo.client._staged = staged
-                Repo.client._chain = state._chain
+                Repo instanceof RequestRepository && (Repo.client = _proxy(state))
                 return Repo
             }
 
