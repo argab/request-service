@@ -4,7 +4,7 @@ Provides a fully customizable Library for handling API using Request repositorie
 
 ## Initialisation
 
-1. Create your own Request client ES-6 classes extending "ClientDecorator" and "RequestHandler" from the package.
+1. Create your own ES-6 classes extending "ClientDecorator" and "RequestHandler" from the package.
 
 ```javascript
 //.......... ApiClient.js
