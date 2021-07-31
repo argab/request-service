@@ -33,7 +33,7 @@ class RequestDecorator {
 
             if (['chainPush', 'getChain'].includes(method)) return state[method](args[0])
 
-            state.chainPush({method, args})
+            state[method] instanceof Function && state.chainPush({method, args})
 
             if (method === 'await') return state.await()
 

@@ -25,8 +25,6 @@ var _RequestFactory = require("./RequestFactory");
 
 var _Mediators = require("./Mediators");
 
-var _Interfaces = require("./Interfaces");
-
 var _helpers = require("./helpers");
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
@@ -127,16 +125,13 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
       extend instanceof Object && Object.keys(extend).forEach(function (key) {
         state._mediator.prototype[key] = extend[key];
       });
+      var isRepo = ['repo', 'stub'].includes(method);
 
-      if (['repo', 'stub'].includes(method)) {
-        var Repo = state[method](args[0]);
-        Repo instanceof _Interfaces.RequestRepository && (Repo.client = new state._mediator(state, state._factory));
-        return Repo;
+      if (false === isRepo && state[method] instanceof Function) {
+        return state[method](args[0]);
       }
 
-      if (state[method] instanceof Function) return state[method](args[0]);
-
-      if (state._mediator.prototype[method] instanceof Function) {
+      if (isRepo || state._mediator.prototype[method] instanceof Function) {
         var _mediator = new state._mediator(state, state._factory);
 
         return _mediator[method](args[0], args[1], args[2], args[3]);

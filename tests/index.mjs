@@ -38,7 +38,7 @@ class Handler extends RequestHandler {
     _data
 
     constructor(data) {
-        super();
+        super()
         this._data = data
     }
 
@@ -74,7 +74,7 @@ class Loader extends RequestLoader {
     _data
 
     constructor(data) {
-        super();
+        super()
         this._data = data
     }
 
@@ -166,17 +166,21 @@ const app = new App();
 
 (async () => {
 
-    await app.getPosts();
+    await app.getPosts()
 
-    await app.getPostsRepo();
+    await app.getPostsRepo()
 
-    await app.getCommentsStub();
+    await app.getCommentsStub()
 
-    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await();
+    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await()
 
     const log = app.request.getLog()
     console.log(result)
     console.log('requests logged number: ', log.length)
+
+    app.request.bg().html().encode().repo('posts').getPosts()
+    await app.request.repo('comments').getComments().await()
+    console.log(prettyFormat(log[log.length-1]))
 
     const chain = []
     log.forEach(r => chain.push(r.getChain().map(i => i.method)))

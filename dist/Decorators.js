@@ -147,7 +147,7 @@ var RequestDecorator = /*#__PURE__*/function () {
     var _proxy = function _proxy(state) {
       return (0, _helpers.proxy)(state, ['data'], function (state, method, args) {
         if (['chainPush', 'getChain'].includes(method)) return state[method](args[0]);
-        state.chainPush({
+        state[method] instanceof Function && state.chainPush({
           method: method,
           args: args
         });

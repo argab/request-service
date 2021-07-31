@@ -1,6 +1,5 @@
 import {RequestFactory} from "./RequestFactory"
 import {RequestMediator, RequestMediatorDecorator} from "./Mediators"
-import {RequestRepository} from "./Interfaces"
 import {proxy, isPrototype} from "./helpers"
 
 class AbstractRequest {
@@ -75,15 +74,13 @@ class Request extends AbstractRequest {
                 state._mediator.prototype[key] = extend[key]
             })
 
-            if (['repo', 'stub'].includes(method)) {
-                const Repo = state[method](args[0])
-                Repo instanceof RequestRepository && (Repo.client = new state._mediator(state, state._factory))
-                return Repo
+            const isRepo = ['repo', 'stub'].includes(method)
+
+            if (false === isRepo && state[method] instanceof Function) {
+                return state[method](args[0])
             }
 
-            if (state[method] instanceof Function) return state[method](args[0])
-
-            if (state._mediator.prototype[method] instanceof Function) {
+            if (isRepo || state._mediator.prototype[method] instanceof Function) {
                 const mediator = new state._mediator(state, state._factory)
                 return mediator[method](args[0], args[1], args[2], args[3])
             }

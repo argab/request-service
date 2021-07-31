@@ -25,6 +25,8 @@ var _Request = require("./Request");
 
 var _RequestFactory = require("./RequestFactory");
 
+var _Interfaces = require("./Interfaces");
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -43,7 +45,21 @@ var RequestMediator = /*#__PURE__*/function () {
 
     var _proxy = function _proxy(state) {
       return (0, _helpers.proxy)(state, null, function (state, method, args) {
-        if (['repo', 'stub'].includes(method)) throw 'The "repo" and "stub" methods are reserved and should be placed at the beginning of the chain call.';
+        var staged = state._staged;
+        var requestService = staged.requestService || Service;
+        var requestDecorator = staged.requestDecorator;
+        var handler = staged.handler;
+        var client = staged.client;
+        staged.requestService && delete staged.requestService;
+        staged.requestDecorator && delete staged.requestDecorator;
+
+        if (['repo', 'stub'].includes(method)) {
+          var Repo = Service[method](args[0], args[1], args[2], args[3]);
+          Repo instanceof _Interfaces.RequestRepository && (Repo.client = new Service._mediator(Service, Factory));
+          Repo.client._staged = staged;
+          Repo.client._chain = state._chain;
+          return Repo;
+        }
 
         if (state[method] instanceof Function) {
           state._chain.push({
@@ -55,13 +71,6 @@ var RequestMediator = /*#__PURE__*/function () {
           return _proxy(state);
         }
 
-        var staged = state._staged;
-        var requestService = staged.requestService || Service;
-        var requestDecorator = staged.requestDecorator;
-        var handler = staged.handler;
-        var client = staged.client;
-        staged.requestService && delete staged.requestService;
-        staged.requestDecorator && delete staged.requestDecorator;
         var factory = new Factory({
           handler: handler,
           client: client,

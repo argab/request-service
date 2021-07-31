@@ -1,6 +1,7 @@
 import {mergeDeep, proxy, isPrototype} from "./helpers"
 import {AbstractRequest} from "./Request"
 import {RequestFactory} from "./RequestFactory"
+import {RequestRepository} from "./Interfaces"
 
 class RequestMediator {
 
@@ -17,17 +18,7 @@ class RequestMediator {
 
         const _proxy = (state) => proxy(state, null, (state, method, args) => {
 
-            if (['repo', 'stub'].includes(method))
-                throw 'The "repo" and "stub" methods are reserved and should be placed at the beginning of the chain call.'
-
-            if (state[method] instanceof Function) {
-                state._chain.push({method, args})
-                state[method](args[0], args[1], args[2], args[3])
-                return _proxy(state)
-            }
-
             const staged = state._staged
-
             const requestService = staged.requestService || Service
             const requestDecorator = staged.requestDecorator
             const handler = staged.handler
@@ -35,6 +26,20 @@ class RequestMediator {
 
             staged.requestService && delete staged.requestService
             staged.requestDecorator && delete staged.requestDecorator
+
+            if (['repo', 'stub'].includes(method)) {
+                const Repo = Service[method](args[0], args[1], args[2], args[3])
+                Repo instanceof RequestRepository && (Repo.client = new Service._mediator(Service, Factory))
+                Repo.client._staged = staged
+                Repo.client._chain = state._chain
+                return Repo
+            }
+
+            if (state[method] instanceof Function) {
+                state._chain.push({method, args})
+                state[method](args[0], args[1], args[2], args[3])
+                return _proxy(state)
+            }
 
             const factory = new Factory({handler, client, requestService, requestDecorator})
 
