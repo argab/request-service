@@ -94,20 +94,20 @@ class App {
     getPosts() {
         return this.request.unlog().get('/posts').then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
-        }).catch(err => console.error(err)).await()
+        }).catch(err => console.error(err))
     }
 
     getPostsRepo() {
         return this.request.repo('posts').getPosts().then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
             throw 'Checking ApiHandler.'
-        }).await()
+        })
     }
 
     getCommentsStub() {
         return this.request.stub('comments').getComments().then(response => {
             console.log('comments STUB: ',  JSON.stringify(response.data))
-        }).catch(err => console.error(err)).await()
+        }).catch(err => console.error(err))
     }
 }
 
@@ -172,18 +172,17 @@ const app = new App();
 
     await app.getCommentsStub()
 
-    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...').await()
+    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
+
+    console.error(result)
 
     const log = app.request.getLog()
-    console.log(result)
     console.log('requests logged number: ', log.length)
 
-    app.request.bg().html().encode().repo('posts').getPosts()
-    await app.request.repo('comments').getComments().await()
-    console.log(prettyFormat(log[log.length-1]))
+    await app.request.bg().html().encode().repo('posts').getPosts()
 
     const chain = []
-    log.forEach(r => chain.push(r.getChain().map(i => i.method)))
+    log.forEach(r => chain.push(r.chain.map(i => i.method)))
     console.log(prettyFormat(chain))
 
 })();

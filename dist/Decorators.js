@@ -9,7 +9,13 @@ exports.ClientDecorator = exports.RequestDecorator = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
@@ -19,7 +25,11 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var _helpers = require("./helpers");
+var _Interfaces = require("./Interfaces");
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var ClientDecorator = /*#__PURE__*/function () {
   function ClientDecorator() {
@@ -137,46 +147,23 @@ var ClientDecorator = /*#__PURE__*/function () {
 
 exports.ClientDecorator = ClientDecorator;
 
-var RequestDecorator = /*#__PURE__*/function () {
+var RequestDecorator = /*#__PURE__*/function (_RequestResolve) {
+  (0, _inherits2["default"])(RequestDecorator, _RequestResolve);
+
+  var _super = _createSuper(RequestDecorator);
+
   function RequestDecorator(data) {
+    var _this;
+
     (0, _classCallCheck2["default"])(this, RequestDecorator);
-    (0, _defineProperty2["default"])(this, "data", {});
-    (0, _defineProperty2["default"])(this, "_chain", []);
-    this.data = data;
-
-    var _proxy = function _proxy(state) {
-      return (0, _helpers.proxy)(state, ['data'], function (state, method, args) {
-        if (['chainPush', 'getChain'].includes(method)) return state[method](args[0]);
-        state[method] instanceof Function && state.chainPush({
-          method: method,
-          args: args
-        });
-        if (method === 'await') return state["await"]();
-        state[method] instanceof Function && state[method](args[0], args[1], args[2], args[3]);
-        return _proxy(state);
-      });
-    };
-
-    return _proxy(this);
+    _this = _super.call(this);
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "data", {});
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "chain", []);
+    _this.data = data;
+    return _this;
   }
 
   (0, _createClass2["default"])(RequestDecorator, [{
-    key: "chainPush",
-    value: function chainPush(_ref) {
-      var method = _ref.method,
-          args = _ref.args;
-
-      this._chain.push({
-        method: method,
-        args: args
-      });
-    }
-  }, {
-    key: "getChain",
-    value: function getChain() {
-      return (0, _toConsumableArray2["default"])(this._chain);
-    }
-  }, {
     key: "success",
     value: function success(callback) {
       this.data.success = callback;
@@ -201,32 +188,8 @@ var RequestDecorator = /*#__PURE__*/function () {
     value: function _finally(callback) {
       this.data["finally"] = callback;
     }
-    /*
-    * This method should be called at the end as it returns a new Promise.
-    * @return: {result, statusCode}
-    * */
-
-  }, {
-    key: "await",
-    value: function _await() {
-      var _this = this;
-
-      return new Promise(function (resolve) {
-        var interval = setInterval(function () {
-          if (_this.data.statusCode) {
-            clearInterval(interval);
-            setTimeout(function () {
-              return resolve({
-                result: _this.data.result,
-                statusCode: _this.data.statusCode
-              });
-            }, 10);
-          }
-        }, 1);
-      });
-    }
   }]);
   return RequestDecorator;
-}();
+}(_Interfaces.RequestResolve);
 
 exports.RequestDecorator = RequestDecorator;

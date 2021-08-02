@@ -3,6 +3,26 @@ import {AbstractRequest} from "./Request"
 import {RequestFactory} from "./RequestFactory"
 import {RequestRepository} from "./Interfaces"
 
+const resolveRequest = (state) => {
+
+    const resolvePromise = new Promise(resolve => {
+        const interval = setInterval(() => {
+            if (state.data.statusCode) {
+                clearInterval(interval)
+                setTimeout(() => resolve(state.data.result), 10)
+            }
+        }, 1)
+    })
+
+    state.requestResolveMethods.forEach(method => state[method] instanceof Function && (resolvePromise[method] = (arg) => {
+        state.chain.push({method, args: [arg]})
+        state[method](arg)
+        return resolvePromise
+    }))
+
+    return resolvePromise
+}
+
 class RequestMediator {
 
     _staged = {}
@@ -52,10 +72,12 @@ class RequestMediator {
                 })
 
                 state._chain.push({method, args})
-                state._chain.forEach(item => request.chainPush(item))
+                request.chain = state._chain
 
                 request.data.log && Service.log(request)
-                return factory.dispatch(request)
+                factory.dispatch(request)
+
+                return resolveRequest(request)
             }
         })
 

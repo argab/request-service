@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RequestLoader = exports.RequestRepository = exports.RequestHandler = void 0;
+exports.RequestResolve = exports.RequestLoader = exports.RequestRepository = exports.RequestHandler = void 0;
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
@@ -65,7 +65,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function isError() {}
     /*
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
+    * @param: incoming response data
     * @return: void
     * */
 
@@ -128,7 +128,7 @@ var RequestHandler = /*#__PURE__*/function () {
     value: function afterCatch() {}
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @params request data
+    * @param: request data
     * @return: void
     * */
 
@@ -140,3 +140,10 @@ var RequestHandler = /*#__PURE__*/function () {
 }();
 
 exports.RequestHandler = RequestHandler;
+
+var RequestResolve = function RequestResolve() {
+  (0, _classCallCheck2["default"])(this, RequestResolve);
+  (0, _defineProperty2["default"])(this, "requestResolveMethods", ['success', 'then', 'error', 'catch', 'finally']);
+};
+
+exports.RequestResolve = RequestResolve;

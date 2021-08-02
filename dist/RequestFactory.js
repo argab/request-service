@@ -45,27 +45,26 @@ var RequestFactory = /*#__PURE__*/function () {
   (0, _createClass2["default"])(RequestFactory, [{
     key: "create",
     value: function create(_ref2) {
-      var _this = this;
-
       var method = _ref2.method,
           uri = _ref2.uri,
           params = _ref2.params,
           config = _ref2.config;
-      config instanceof Object || (config = {});
+      var request = new this._request(_objectSpread(_objectSpread({}, config), {
+        uri: uri,
+        params: params,
+        method: method
+      }));
 
       if (this._requestService) {
         var extend = this._requestService["extends"]().request;
 
         extend instanceof Object && Object.keys(extend).forEach(function (key) {
-          return _this._request.prototype[key] = extend[key];
+          request.requestResolveMethods.push(key);
+          request[key] = extend[key];
         });
       }
 
-      return new this._request(_objectSpread(_objectSpread({}, config), {
-        uri: uri,
-        params: params,
-        method: method
-      }));
+      return request;
     }
   }, {
     key: "dispatch",
@@ -73,7 +72,6 @@ var RequestFactory = /*#__PURE__*/function () {
       if (false === request instanceof _Decorators.RequestDecorator) return;
       var client = this.getClient(request.data);
       client[request.data.method] instanceof Function && this.resolveClient(client, request);
-      return request;
     }
   }, {
     key: "getClient",
@@ -108,7 +106,7 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "resolveClient",
     value: function resolveClient(client, request) {
-      var _this2 = this,
+      var _this = this,
           _getLoader;
 
       var handlers = this.getHandlers(request.data);
@@ -122,9 +120,9 @@ var RequestFactory = /*#__PURE__*/function () {
       var Loader = request.data.useLoader && (0, _helpers.isPrototype)(_Interfaces.RequestLoader, request.data.loader) ? new request.data.loader(request.data) : null;
 
       var getLoader = function getLoader() {
-        var _this2$_requestServic;
+        var _this$_requestService;
 
-        Loader && (Loader.pending = (_this2$_requestServic = _this2._requestService) === null || _this2$_requestServic === void 0 ? void 0 : _this2$_requestServic.getLog().filter(function (r) {
+        Loader && (Loader.pending = (_this$_requestService = _this._requestService) === null || _this$_requestService === void 0 ? void 0 : _this$_requestService.getLog().filter(function (r) {
           return r.data.useLoader && !r.data.statusCode;
         }).length);
         return Loader;
@@ -132,17 +130,17 @@ var RequestFactory = /*#__PURE__*/function () {
 
       (_getLoader = getLoader()) === null || _getLoader === void 0 ? void 0 : _getLoader.start();
       promise.then(function (response) {
-        _this2.resolveClientOnResponse(response, request, handlers);
+        _this.resolveClientOnResponse(response, request, handlers);
 
         request.data.statusCode || (request.data.statusCode = 200);
       })["catch"](function (error) {
-        _this2.resolveClientOnCatch(error, request, handlers);
+        _this.resolveClientOnCatch(error, request, handlers);
 
         request.data.statusCode || (request.data.statusCode = 500);
       })["finally"](function () {
         var _getLoader2;
 
-        _this2.resolveClientOnFinally(request, handlers);
+        _this.resolveClientOnFinally(request, handlers);
 
         request.data.statusCode || (request.data.statusCode = 200);
         (_getLoader2 = getLoader()) === null || _getLoader2 === void 0 ? void 0 : _getLoader2.end();

@@ -64,7 +64,7 @@ export default class extends RequestHandler {
 
     /*
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
+    * @param: incoming response data
     * @return: void
     * */
     onSuccess() {
@@ -120,7 +120,7 @@ export default class extends RequestHandler {
 
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @params request data
+    * @param: request data
     * @return: void
     * */
     afterFinally() {
@@ -186,11 +186,6 @@ this.request
     .error(response => {}) // If not called, then ApiHandler`s "onError" will be executed.
     .catch(error => {}) // If not called, then ApiHandler`s "onCatch" will be executed.
     .finally(requestData => {}) // If not called, then ApiHandler`s "onFinally" will be executed.
-
-    // get as a new Promise.prototype;
-    // as a result we get the request`s result and statusCode here
-    // @return: {result, statusCode}
-    .await()
 
 ```
 

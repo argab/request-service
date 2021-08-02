@@ -35,6 +35,30 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
+var resolveRequest = function resolveRequest(state) {
+  var resolvePromise = new Promise(function (resolve) {
+    var interval = setInterval(function () {
+      if (state.data.statusCode) {
+        clearInterval(interval);
+        setTimeout(function () {
+          return resolve(state.data.result);
+        }, 10);
+      }
+    }, 1);
+  });
+  state.requestResolveMethods.forEach(function (method) {
+    return state[method] instanceof Function && (resolvePromise[method] = function (arg) {
+      state.chain.push({
+        method: method,
+        args: [arg]
+      });
+      state[method](arg);
+      return resolvePromise;
+    });
+  });
+  return resolvePromise;
+};
+
 var RequestMediator = /*#__PURE__*/function () {
   function RequestMediator(Service, Factory) {
     (0, _classCallCheck2["default"])(this, RequestMediator);
@@ -91,12 +115,10 @@ var RequestMediator = /*#__PURE__*/function () {
             args: args
           });
 
-          state._chain.forEach(function (item) {
-            return request.chainPush(item);
-          });
-
+          request.chain = state._chain;
           request.data.log && Service.log(request);
-          return factory.dispatch(request);
+          factory.dispatch(request);
+          return resolveRequest(request);
         }
       });
     };

@@ -19,23 +19,24 @@ class RequestFactory {
     }
 
     create({method, uri, params, config}) {
-        config instanceof Object || (config = {})
+
+        const request = new this._request({...config, ...{uri, params, method}})
 
         if (this._requestService) {
             const extend = this._requestService.extends().request
-            extend instanceof Object && Object.keys(extend).forEach(key => this._request.prototype[key] = extend[key])
+            extend instanceof Object && Object.keys(extend).forEach(key => {
+                request.requestResolveMethods.push(key)
+                request[key] = extend[key]
+            })
         }
 
-        return new this._request({...config, ...{uri, params, method}})
+        return request
     }
 
     dispatch(request) {
         if (false === (request instanceof RequestDecorator)) return
-
         const client = this.getClient(request.data)
         client[request.data.method] instanceof Function && this.resolveClient(client, request)
-
-        return request
     }
 
     getClient(data) {

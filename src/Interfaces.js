@@ -44,7 +44,7 @@ class RequestHandler {
 
     /*
     * method executes within a Promise.prototype.then()
-    * @params: incoming response data
+    * @param: incoming response data
     * @return: void
     * */
     onSuccess() {
@@ -100,11 +100,19 @@ class RequestHandler {
 
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @params request data
+    * @param: request data
     * @return: void
     * */
     afterFinally() {
     }
 }
 
-export {RequestHandler, RequestRepository, RequestLoader}
+class RequestResolve {
+
+    requestResolveMethods = [
+        'success', 'then', 'error', 'catch', 'finally'
+    ]
+
+}
+
+export {RequestHandler, RequestRepository, RequestLoader, RequestResolve}
