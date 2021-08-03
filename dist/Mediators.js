@@ -205,6 +205,15 @@ var RequestMediatorDecorator = /*#__PURE__*/function (_RequestMediator) {
       });
     }
   }, {
+    key: "stream",
+    value: function stream() {
+      this.config({
+        headers: {
+          'Content-Type': 'application/octet-stream'
+        }
+      });
+    }
+  }, {
     key: "useLoader",
     value: function useLoader() {
       var _useLoader = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;

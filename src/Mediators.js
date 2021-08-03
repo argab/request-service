@@ -119,6 +119,10 @@ class RequestMediatorDecorator extends RequestMediator {
         this.config({headers: {'Accept': 'text/html'}})
     }
 
+    stream() {
+        this.config({headers: {'Content-Type': 'application/octet-stream'}})
+    }
+
     useLoader(useLoader = true) {
         this.config({useLoader: Boolean(useLoader)})
     }

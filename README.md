@@ -177,6 +177,7 @@ this.request
     .encode() // Similar to .headers({'Content-Type': 'application/x-www-form-urlencoded'})
     .form() // Similar to .headers({'Content-Type': 'multipart/form-data'})
     .html() // Similar to .headers({'Accept': 'text/html'})
+    .stream() // Similar to .headers({'Content-Type': 'application/octet-stream'})
     
     // Client Decorator (required):
     .post('http://some.url', {parameters})
