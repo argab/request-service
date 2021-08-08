@@ -429,20 +429,40 @@ export default class extends RequestHandler {
 
     onFinally() {
         
-        
         /*
         * (This method is Abstract (Not subject to redeclare))
         * The request restarting method.
         * @param: {Boolean}|{Function}(data):<Boolean|Promise> 
         *     - Boolean or a Function returning both Boolean or a Promise
-        *       returning Boolean that whenever is TRUE then restarts the request.
+        *       returning Boolean that whenever 
+        *       is TRUE then restarts the request.
         * @return: void
         * */
         this.retry((data) => new Promise(resolve => {
-            //...do some logic here
-            // then restart the request:
+            //...do some logic and restart the request:
             resolve(true)
         }))
+        
+        // ANOTHER WAYS:
+        
+        // getting restart at once:
+        this.retry(true)
+        
+        // getting restart with some modifications:
+        this.retry(data => {
+            // changing the original request (optional):
+            data.retryChain = ({chain}) => {
+                chain.push({
+                    method: 'error', 
+                    args: [
+                        () => {console.log('"error" method has been overriden.')}
+                    ]
+                })
+                return chain
+            }
+            //...do some logic and restart the request:
+            return true
+        })
     }
 }
 
