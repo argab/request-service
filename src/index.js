@@ -1,7 +1,23 @@
-import {ClientDecorator, RequestDecorator} from "./Decorators"
-import {RequestHandler, RequestRepository, RequestLoader} from "./Interfaces"
-import {Request, AbstractRequest} from "./Request"
+import {RequestMiddlewareDecorator, RequestDecorator} from "./Decorators"
+import {RequestHandler, RequestRepository, RequestLoader, RequestClient} from "./Interfaces"
+import {Request, AbstractRequest, RequestService} from "./Request"
 import {RequestFactory} from "./RequestFactory"
-import {RequestMediator, RequestMediatorDecorator} from "./Mediators"
+import {RequestMiddleware} from "./RequestMiddleware"
+import {RequestDispatcher} from "./RequestDispatcher"
+import {RequestRetry} from "./RequestRetry"
 
-export {Request, AbstractRequest, RequestRepository, RequestLoader, ClientDecorator, RequestDecorator, RequestMediator, RequestMediatorDecorator, RequestHandler, RequestFactory}
+export {
+    AbstractRequest,
+    RequestService,
+    Request,
+    RequestRepository,
+    RequestLoader,
+    RequestClient,
+    RequestDecorator,
+    RequestMiddleware,
+    RequestMiddlewareDecorator,
+    RequestDispatcher,
+    RequestHandler,
+    RequestFactory,
+    RequestRetry
+}

@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "ClientDecorator", {
+Object.defineProperty(exports, "RequestMiddlewareDecorator", {
   enumerable: true,
   get: function get() {
-    return _Decorators.ClientDecorator;
+    return _Decorators.RequestMiddlewareDecorator;
   }
 });
 Object.defineProperty(exports, "RequestDecorator", {
@@ -33,6 +33,12 @@ Object.defineProperty(exports, "RequestLoader", {
     return _Interfaces.RequestLoader;
   }
 });
+Object.defineProperty(exports, "RequestClient", {
+  enumerable: true,
+  get: function get() {
+    return _Interfaces.RequestClient;
+  }
+});
 Object.defineProperty(exports, "Request", {
   enumerable: true,
   get: function get() {
@@ -45,22 +51,34 @@ Object.defineProperty(exports, "AbstractRequest", {
     return _Request.AbstractRequest;
   }
 });
+Object.defineProperty(exports, "RequestService", {
+  enumerable: true,
+  get: function get() {
+    return _Request.RequestService;
+  }
+});
 Object.defineProperty(exports, "RequestFactory", {
   enumerable: true,
   get: function get() {
     return _RequestFactory.RequestFactory;
   }
 });
-Object.defineProperty(exports, "RequestMediator", {
+Object.defineProperty(exports, "RequestMiddleware", {
   enumerable: true,
   get: function get() {
-    return _Mediators.RequestMediator;
+    return _RequestMiddleware.RequestMiddleware;
   }
 });
-Object.defineProperty(exports, "RequestMediatorDecorator", {
+Object.defineProperty(exports, "RequestDispatcher", {
   enumerable: true,
   get: function get() {
-    return _Mediators.RequestMediatorDecorator;
+    return _RequestDispatcher.RequestDispatcher;
+  }
+});
+Object.defineProperty(exports, "RequestRetry", {
+  enumerable: true,
+  get: function get() {
+    return _RequestRetry.RequestRetry;
   }
 });
 
@@ -72,4 +90,8 @@ var _Request = require("./Request");
 
 var _RequestFactory = require("./RequestFactory");
 
-var _Mediators = require("./Mediators");
+var _RequestMiddleware = require("./RequestMiddleware");
+
+var _RequestDispatcher = require("./RequestDispatcher");
+
+var _RequestRetry = require("./RequestRetry");

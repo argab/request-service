@@ -1,3 +1,31 @@
-const {Request, AbstractRequest, RequestLoader, RequestRepository, ClientDecorator, RequestDecorator, RequestMediator, RequestMediatorDecorator, RequestHandler, RequestFactory} = require('./dist');
+const {
+    AbstractRequest,
+    RequestService,
+    Request,
+    RequestRepository,
+    RequestLoader,
+    RequestClient,
+    RequestDecorator,
+    RequestMiddleware,
+    RequestMiddlewareDecorator,
+    RequestDispatcher,
+    RequestHandler,
+    RequestFactory,
+    RequestRetry
+} = require('./dist');
 
-module.exports = {Request, AbstractRequest, RequestLoader, RequestRepository, ClientDecorator, RequestDecorator, RequestMediator, RequestMediatorDecorator, RequestHandler, RequestFactory}
+module.exports = {
+    AbstractRequest,
+    RequestService,
+    Request,
+    RequestRepository,
+    RequestLoader,
+    RequestClient,
+    RequestDecorator,
+    RequestMiddleware,
+    RequestMiddlewareDecorator,
+    RequestDispatcher,
+    RequestHandler,
+    RequestFactory,
+    RequestRetry
+}

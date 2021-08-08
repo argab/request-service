@@ -1,7 +1,26 @@
+class RequestClient {
+
+    async get() {
+    }
+
+    async post() {
+    }
+
+    async patch() {
+    }
+
+    async put() {
+    }
+
+    async delete() {
+    }
+
+}
+
 class RequestRepository {
 
     /*
-    * @property: Object: An Instance of the Request implementing AbstractRequest
+    * @property: {Object} An Instance of the Request implementing AbstractRequest
     * @return: new Proxy
     * */
     client
@@ -10,7 +29,7 @@ class RequestRepository {
 class RequestLoader {
 
     /*
-    * @property: Number: Displays a number of requests that uses Loader and having pending status
+    * @property: {Number} Displays a number of requests that uses Loader and having pending status
     * */
     pending
 
@@ -27,92 +46,94 @@ class RequestHandler {
     /*
     * response checking method
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: Boolean
     * */
-    isSuccess() {
+    isSuccess(response) {
     }
 
     /*
     * response checking method
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: Boolean
     * */
-    isError() {
+    isError(response) {
     }
 
     /*
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: void
     * */
-    onSuccess() {
+    onSuccess(response) {
     }
 
     /*
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: void
     * */
-    onError() {
+    onError(response) {
     }
 
     /*
     * method executes within a Promise.prototype.catch()
-    * @param: error
+    * @param: {Object} error
     * @return: void
     * */
-    onCatch() {
+    onCatch(error) {
     }
 
     /*
     * method executes within a Promise.prototype.finally()
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    onFinally() {
+    onFinally(data) {
     }
 
     /*
     * method executes before request sent
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    before() {
+    before(data) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.then()
-    * @param: response
+    * @param: {Object} response
     * @return: void
     * */
-    after() {
+    after(response) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.catch()
-    * @param: error
+    * @param: {Object} error
     * @return: void
     * */
-    afterCatch() {
+    afterCatch(error) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    afterFinally() {
+    afterFinally(data) {
+    }
+
+    /*
+    * (This method is Abstract (Not subject to redeclare))
+    * The request restarting method.
+    * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
+    * returning Boolean that whenever is TRUE then restarts the request.
+    * @return: void
+    * */
+    retry(resolve) {
     }
 }
 
-class RequestResolve {
-
-    requestResolveMethods = [
-        'success', 'then', 'error', 'catch', 'finally'
-    ]
-
-}
-
-export {RequestHandler, RequestRepository, RequestLoader, RequestResolve}
+export {RequestHandler, RequestRepository, RequestLoader, RequestClient}

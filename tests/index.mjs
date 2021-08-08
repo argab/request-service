@@ -1,13 +1,13 @@
 import axios from 'axios';
 import {format as prettyFormat} from 'pretty-format';
 
-import {Request, RequestLoader, ClientDecorator, RequestHandler} from '../dist/index.js'
+import {RequestService, RequestLoader, RequestClient, RequestHandler} from '../dist/index.js'
 import RepoPosts from './repo/posts.mjs';
 import RepoComments from './stubs/comments.mjs';
 
 const _axios = (config) => axios.create(config);
 
-class Client extends ClientDecorator {
+class Client extends RequestClient {
 
     _endpoint = 'https://my-json-server.typicode.com/typicode/demo';
 
@@ -51,6 +51,7 @@ class Handler extends RequestHandler {
     }
 
     after(response) {
+        // this.retry(() => true, null, 3)
         console.log(this._data.headers)
 
         const notifySuccess = this._data.done;
@@ -65,6 +66,17 @@ class Handler extends RequestHandler {
 
     onSuccess() {
         return 'This is a request result.'
+    }
+
+    onFinally() {
+        // this.retry((data) => new Promise(resolve => {
+        //     //...do some logic here
+        //     // then retry the request:
+        //     setTimeout(() => {
+        //         console.error('Go retry!!!')
+        //         resolve(true)
+        //     }, 3000)
+        // }))
     }
 
 }
@@ -111,7 +123,7 @@ class App {
     }
 }
 
-App.prototype.request = new Request({
+App.prototype.request = new RequestService({
 
     getRepo: (path) => {
         console.log(path)
@@ -131,9 +143,9 @@ App.prototype.request = new Request({
     },
 
     extend: {
-        mediator: {
+        middleware: {
             awesome: function () {
-                console.log('This is my awesome mediator function!')
+                console.log('This is my awesome middleware function!')
 
                 this.config({headers: {'X-AwesomeHeader': 'v1.0.0'}})
             },
@@ -166,25 +178,53 @@ const app = new App();
 
 (async () => {
 
+    await app.request.get('/posts').then(response => {
+        console.log('simple posts: ',  JSON.stringify(response.data))
+    }).catch(err => console.error(err))
+
     await app.getPosts()
 
     await app.getPostsRepo()
 
     await app.getCommentsStub()
 
-    const result = await app.request.html().awesome().get('/posts').done('Wow, that`s awesome!').alert('Ooops...')
+    const result = await app.request.html()
+        .awesome()
+        .get('/posts')
+        .success(() => { throw 'Oooooops!' })
+        .done('Wow, that`s awesome!')
+        .alert('Ooops...')
+        // .finally(() => {
+        //     console.error('finally All done.')
+        // })
+        .retryMaxCount(1)
+        .retryTimeout(3000)
+        // .retry(true)
+        .retryChain(({chain}) => {
+            chain.push({method: 'success', args: [() => {console.error('Good!')}]})
+            return chain
+        })
+        .retryOnCatch(data => {
+            return new Promise(res => {
+                setTimeout(() => {
+                    console.error('Awesome error: ', data.dataError)
+                    res(true)
+                }, 3000)
+            })
+        })
 
     console.error(result)
 
     const log = app.request.getLog()
     console.log('requests logged number: ', log.length)
+    console.log(log[log.length-1].data)
 
-    await app.request.bg().html().encode().repo('posts').getPosts()
+    await app.request.bg().html().encode().repo('posts').getPosts().retry(true).retryMaxCount(3)
+
+    // await app.request.bg().html().encode().repo('posts').getPosts().retryMaxCount(3)
 
     const chain = []
     log.forEach(r => chain.push(r.chain.map(i => i.method)))
     console.log(prettyFormat(chain))
 
 })();
-
-

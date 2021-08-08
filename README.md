@@ -1,6 +1,6 @@
 # Request Service
 
-Provides a fully customizable Library for handling API using Request repositories and Stubs.
+Provides a fully customizable Library for handling API using Request Repositories and Stubs.
 
 ## Initialisation
 
@@ -9,12 +9,12 @@ Provides a fully customizable Library for handling API using Request repositorie
 ```javascript
 //.......... ApiClient.js
 
-import {ClientDecorator} from '@argab/request-service'
+import {RequestClient} from '@argab/request-service'
 import axios from 'axios'
 
 const _axios = (config) => axios.create(config)
 
-export default class extends ClientDecorator {
+export default class extends RequestClient {
 
     get({headers, uri, params}) {
         return _axios({headers}).get(uri, params)
@@ -47,83 +47,83 @@ export default class extends RequestHandler {
     /*
     * response checking method
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: Boolean
     * */
-    isSuccess() {
+    isSuccess(response) {
     }
 
     /*
     * response checking method
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: Boolean
     * */
-    isError() {
+    isError(response) {
     }
 
     /*
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: void
     * */
-    onSuccess() {
+    onSuccess(response) {
     }
 
     /*
     * method executes within a Promise.prototype.then()
-    * @param: incoming response data
+    * @param: {Object} incoming response data
     * @return: void
     * */
-    onError() {
+    onError(response) {
     }
 
     /*
     * method executes within a Promise.prototype.catch()
-    * @param: error
+    * @param: {Object} error
     * @return: void
     * */
-    onCatch() {
+    onCatch(error) {
     }
 
     /*
     * method executes within a Promise.prototype.finally()
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    onFinally() {
+    onFinally(data) {
     }
 
     /*
     * method executes before request sent
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    before() {
+    before(data) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.then()
-    * @param: response
+    * @param: {Object} response
     * @return: void
     * */
-    after() {
+    after(response) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.catch()
-    * @param: error
+    * @param: {Object} error
     * @return: void
     * */
-    afterCatch() {
+    afterCatch(error) {
     }
 
     /*
     * method executes at the start of a Promise.prototype.finally()
-    * @param: request data
+    * @param: {Object} request data
     * @return: void
     * */
-    afterFinally() {
+    afterFinally(data) {
     }
 }
 
@@ -133,11 +133,11 @@ export default class extends RequestHandler {
 2.  Initialise the Request Service and connect it to your App:
 
 ```javascript
-import {Request} from '@argab/request-service'
+import {RequestService} from '@argab/request-service'
 import ApiClient from './src/api/ApiClient'
 import ApiHandler from './src/api/ApiHandler'
 
-MyApp.prototype.request = new Request({
+MyApp.prototype.request = new RequestService({
   config: {
       client: ApiClient,
       handler: ApiHandler
@@ -200,11 +200,11 @@ Request repositories allow you to move the complex logic of creating requests to
 ```javascript
 //............ MyApp.js
 
-import {Request} from '@argab/request-service'
+import {RequestService} from '@argab/request-service'
 import ApiClient from './src/api/_clients/ApiClient'
 import ApiHandler from './src/api/_handlers/ApiHandler'
 
-MyApp.prototype.request = new Request({
+MyApp.prototype.request = new RequestService({
   getRepo: (path) => {
       const Repo = require(`./api/${path}`).default
       return new Repo
@@ -295,12 +295,12 @@ class MyLoader extends RequestLoader {
 
 //............ MyApp.js
 
-import {Request} from '@argab/request-service'
+import {RequestService} from '@argab/request-service'
 import ApiClient from './src/api/_clients/ApiClient'
 import MyLoader from './src/api/_loaders/MyLoader'
 import MyCustomLoader from './src/api/_loaders/MyCustomLoader'
 
-MyApp.prototype.request = new Request({
+MyApp.prototype.request = new RequestService({
   config: {
       client: ApiClient,
       loader: MyLoader,
@@ -330,20 +330,20 @@ the Base Request's prototype.
 
 //............ MyApp.js
 
-import {Request} from '@argab/request-service'
+import {RequestService} from '@argab/request-service'
 import ApiClient from './src/api/_clients/ApiClient'
 import ApiHandler from './src/api/_handlers/ApiHandler'
 
-MyApp.prototype.request = new Request({
+MyApp.prototype.request = new RequestService({
   config: {
       client: ApiClient,
       handler: ApiHandler
   },
   extend: {
-        mediator: {
+        middleware: {
             // Be aware to declare via "function" as it allows to access to the current context by "this".
             awesome: function () {
-                console.log('This is my awesome mediator function!')
+                console.log('This is my awesome middleware function!')
                 
                 this.config({headers: {'X-AwesomeHeader': 'v1.0.0'}})
             }
@@ -404,7 +404,7 @@ Output from tests:
 
 
 ```
-This is my awesome mediator function!
+This is my awesome middleware function!
 Requests in pending status:  1
 Request pending:  GET /posts...
 This is what my ApiHandler would notify about at response success:  Wow, that`s awesome!
@@ -413,4 +413,125 @@ Wow, that`s awesome!
 Request complete:  GET /posts.
 ```
 
+## Retrying the Request
 
+
+Request retrying available both from the Request Handler and Request call:
+
+
+```javascript
+
+/////////// Retrying from Handler:
+
+import {RequestHandler} from '@argab/request-service'
+
+export default class extends RequestHandler {
+
+    onFinally() {
+        
+        
+        /*
+        * (This method is Abstract (Not subject to redeclare))
+        * The request restarting method.
+        * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
+        * returning Boolean that whenever is TRUE then restarts the request.
+        * @return: void
+        * */
+        this.retry((data) => new Promise(resolve => {
+            //...do some logic here
+            // then restart the request:
+            resolve(true)
+        }))
+    }
+}
+
+/////////// Retrying from the request call:
+
+const result = await app.request
+    .awesome()
+    .get('/posts')
+    .error(() => { throw 'Oops!' })
+    .retryMaxCount(3)
+    .retryTimeout(3000)
+    // .retry(true)
+    .retryChain(({chain}) => {
+        chain.push({
+            method: 'error', 
+            args: [
+                () => {console.log('"error" method has been overriden.')}
+            ]
+        })
+        return chain
+    })
+    .retryOnCatch(data => {
+        return new Promise(res => {
+            setTimeout(() => {
+                console.error('Awesome error: ', data.dataError)
+                res(true)
+            }, 3000)
+        })
+    })
+
+console.log(result)
+
+
+```
+
+####Retry Methods:
+
+```javascript
+
+/*
+* This method doesn't restarts the request, it brings the Function that
+* takes the request data as an argument and initiates the request restarting method.
+* The Function executes at the end of a Promise.prototype.finally()
+* @param: {Boolean}|{Function}(data):<Boolean|Promise> 
+*     - Boolean or a Function returning both Boolean or a Promise
+*     returning Boolean that whenever is TRUE then restarts the request
+* @return: void
+* */
+retry (resolve) {}
+
+/*
+* The request retry error handler.
+* The Function executes at the end of a Promise.prototype.finally()
+* @param: {Boolean}|{Function}(data):<Boolean|Promise> 
+*     - Boolean or a Function returning both Boolean or a Promise
+*     returning Boolean that whenever is TRUE then restarts the request
+* @return: void
+* */
+retryOnCatch (resolve) {}
+
+/*
+* Overrides the current request`s methods call chain on retry.
+* The Function executes within a retry method.
+* @example: ....retryChain(({set}) => set.json()
+*   .post('http://some.url', {params})
+*   .success(...).error(...).catch(...))
+* @param: {Function}({set, chain, data}):<void|Array>
+*     - @property "set" creates a new set
+*       of the current request`s methods call chain
+*       staged as an Array in a property named "retryChainSet".
+*     - @property "chain" provides an Array
+*       [{method, args}, {method, args}, ....]
+*       containing the current request`s methods call chain.
+*     - @property "data" - current request`s data.
+* @return: void
+* */
+retryChain (callback) {}
+
+/*
+* Sets a max number of retry attempts
+* @param: {Number}
+* @return: void
+* */
+retryMaxCount (count) {}
+
+/*
+* Sets the timeout in miliseconds between retry attempts
+* @param: {Number}
+* @return: void
+* */
+retryTimeout (miliseconds) {}
+
+```

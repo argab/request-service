@@ -1,32 +1,55 @@
-import {RequestResolve} from "./Interfaces"
+import {Request} from "./Request"
+import {RequestMiddleware} from "./RequestMiddleware";
 
-class ClientDecorator {
+class RequestMiddlewareDecorator extends RequestMiddleware {
 
-    async get() {
+    stubData(stubData) {
+        this.config({stubData})
     }
 
-    async post() {
+    unlog() {
+        this.config({log: false})
     }
 
-    async patch() {
+    headers(headers) {
+        this.config({headers})
     }
 
-    async put() {
+    encode() {
+        this.config({headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
     }
 
-    async delete() {
+    form() {
+        this.config({headers: {'Content-Type': 'multipart/form-data'}})
+    }
+
+    json() {
+        this.config({headers: {'Content-Type': 'application/json;charset=UTF-8'}})
+    }
+
+    html() {
+        this.config({headers: {'Accept': 'text/html'}})
+    }
+
+    stream() {
+        this.config({headers: {'Content-Type': 'application/octet-stream'}})
+    }
+
+    useLoader(useLoader = true) {
+        this.config({useLoader: Boolean(useLoader)})
+    }
+
+    bg() {
+        this.config({useLoader: false})
     }
 
 }
 
-class RequestDecorator extends RequestResolve {
-
-    data = {}
-    chain = []
+class RequestDecorator extends Request {
 
     constructor(data) {
-        super()
-        this.data = data
+        super(data)
+        this._methods = this._methods.concat(['success', 'then', 'error', 'catch', 'finally'])
     }
 
     success(callback) {
@@ -48,7 +71,6 @@ class RequestDecorator extends RequestResolve {
     finally(callback) {
         this.data.finally = callback
     }
-
 }
 
-export {RequestDecorator, ClientDecorator}
+export {RequestDecorator, RequestMiddlewareDecorator}

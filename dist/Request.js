@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AbstractRequest = exports.Request = void 0;
+exports.AbstractRequest = exports.Request = exports.RequestService = void 0;
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
@@ -23,7 +23,13 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 
 var _RequestFactory = require("./RequestFactory");
 
-var _Mediators = require("./Mediators");
+var _RequestMiddleware = require("./RequestMiddleware");
+
+var _Decorators = require("./Decorators");
+
+var _RequestDispatcher = require("./RequestDispatcher");
+
+var _RequestRetry = require("./RequestRetry");
 
 var _helpers = require("./helpers");
 
@@ -40,13 +46,17 @@ var AbstractRequest = /*#__PURE__*/function () {
     (0, _classCallCheck2["default"])(this, AbstractRequest);
     (0, _defineProperty2["default"])(this, "_requests", []);
     (0, _defineProperty2["default"])(this, "_factory", void 0);
-    (0, _defineProperty2["default"])(this, "_mediator", void 0);
+    (0, _defineProperty2["default"])(this, "_dispatcher", void 0);
+    (0, _defineProperty2["default"])(this, "_middleware", void 0);
+    (0, _defineProperty2["default"])(this, "_retry", void 0);
     (0, _defineProperty2["default"])(this, "_getRepo", void 0);
     (0, _defineProperty2["default"])(this, "_getStub", void 0);
     (0, _defineProperty2["default"])(this, "_useStubs", void 0);
     (0, _defineProperty2["default"])(this, "_config", {
       handler: null,
       client: null,
+      repo: null,
+      repoPath: null,
       loader: null,
       useLoader: false,
       stubData: null,
@@ -61,12 +71,18 @@ var AbstractRequest = /*#__PURE__*/function () {
       error: null,
       "finally": null,
       "catch": null,
+      retry: null,
+      retryOnCatch: null,
+      retryChain: null,
+      retryMaxCount: 0,
+      retryTimeout: 0,
+      retryCount: 0,
       dataError: null,
       result: null,
       log: true
     });
     (0, _defineProperty2["default"])(this, "_extend", {
-      mediator: null,
+      middleware: null,
       request: null
     });
   }
@@ -92,22 +108,25 @@ var AbstractRequest = /*#__PURE__*/function () {
 
 exports.AbstractRequest = AbstractRequest;
 
-var Request = /*#__PURE__*/function (_AbstractRequest) {
-  (0, _inherits2["default"])(Request, _AbstractRequest);
+var RequestService = /*#__PURE__*/function (_AbstractRequest) {
+  (0, _inherits2["default"])(RequestService, _AbstractRequest);
 
-  var _super = _createSuper(Request);
+  var _super = _createSuper(RequestService);
 
-  function Request(_ref) {
+  function RequestService(_ref) {
     var _this;
 
     var config = _ref.config,
         getRepo = _ref.getRepo,
         getStub = _ref.getStub,
         useStubs = _ref.useStubs,
+        extend = _ref.extend,
         factory = _ref.factory,
-        mediator = _ref.mediator,
-        extend = _ref.extend;
-    (0, _classCallCheck2["default"])(this, Request);
+        dispatcher = _ref.dispatcher,
+        middleware = _ref.middleware,
+        requestDecorator = _ref.requestDecorator,
+        requestRetry = _ref.requestRetry;
+    (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
       return null;
@@ -117,29 +136,31 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
     };
     _this._useStubs = Boolean(useStubs);
     _this._factory = (0, _helpers.isPrototype)(_RequestFactory.RequestFactory, factory) ? factory : _RequestFactory.RequestFactory;
-    _this._mediator = (0, _helpers.isPrototype)(_Mediators.RequestMediator, mediator) ? mediator : _Mediators.RequestMediatorDecorator;
+    _this._dispatcher = (0, _helpers.isPrototype)(_RequestDispatcher.RequestDispatcher, dispatcher) ? dispatcher : _RequestDispatcher.RequestDispatcher;
+    _this._middleware = (0, _helpers.isPrototype)(_RequestMiddleware.RequestMiddleware, middleware) ? middleware : _Decorators.RequestMiddlewareDecorator;
+    _this._retry = (0, _helpers.isPrototype)(_RequestRetry.RequestRetry, requestRetry) ? requestRetry : _RequestRetry.RequestRetry;
     config instanceof Object && Object.assign(_this._config, config);
     extend instanceof Object && Object.assign(_this._extend, extend);
-    return (0, _possibleConstructorReturn2["default"])(_this, (0, _helpers.proxy)((0, _assertThisInitialized2["default"])(_this), null, function (state, method, args) {
-      var extend = state["extends"]().mediator;
-      extend instanceof Object && Object.keys(extend).forEach(function (key) {
-        state._mediator.prototype[key] = extend[key];
-      });
-      var isRepo = ['repo', 'stub'].includes(method);
+    _this._factory = new _this._factory({
+      requestDecorator: requestDecorator,
+      service: (0, _assertThisInitialized2["default"])(_this)
+    });
 
-      if (false === isRepo && state[method] instanceof Function) {
+    var _extend = _this["extends"]().middleware;
+
+    _extend instanceof Object && Object.keys(_extend).forEach(function (key) {
+      _this._middleware.prototype[key] = _extend[key];
+    });
+    return (0, _possibleConstructorReturn2["default"])(_this, (0, _helpers.proxy)((0, _assertThisInitialized2["default"])(_this), null, function (state, method, args) {
+      if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
         return state[method](args[0]);
       }
 
-      if (isRepo || state._mediator.prototype[method] instanceof Function) {
-        var _mediator = new state._mediator(state, state._factory);
-
-        return _mediator[method](args[0], args[1], args[2], args[3]);
-      }
+      return new state._middleware(state)[method](args[0], args[1], args[2], args[3]);
     }));
   }
 
-  (0, _createClass2["default"])(Request, [{
+  (0, _createClass2["default"])(RequestService, [{
     key: "repo",
     value: function repo(path) {
       if (this._useStubs) {
@@ -170,7 +191,94 @@ var Request = /*#__PURE__*/function (_AbstractRequest) {
       return _objectSpread({}, this._extend);
     }
   }]);
-  return Request;
+  return RequestService;
 }(AbstractRequest);
+
+exports.RequestService = RequestService;
+
+var Request = /*#__PURE__*/function () {
+  function Request(data) {
+    (0, _classCallCheck2["default"])(this, Request);
+    (0, _defineProperty2["default"])(this, "data", {});
+    (0, _defineProperty2["default"])(this, "chain", []);
+    (0, _defineProperty2["default"])(this, "retryChainSet", []);
+    (0, _defineProperty2["default"])(this, "_methods", ['retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']);
+    this.data = data;
+  }
+  /*
+  * This method doesn't restarts the request, it brings the Function that
+  * takes the request data as an argument and initiates the request restarting method.
+  * The Function executes at the end of a Promise.prototype.finally()
+  * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
+  * returning Boolean that whenever is TRUE then restarts the request
+  * @return: void
+  * */
+
+
+  (0, _createClass2["default"])(Request, [{
+    key: "retry",
+    value: function retry(resolve) {
+      this.data.retry = resolve;
+    }
+    /*
+    * The request retry error handler.
+    * The Function executes at the end of a Promise.prototype.finally()
+    * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
+    * returning Boolean that whenever is TRUE then restarts the request
+    * @return: void
+    * */
+
+  }, {
+    key: "retryOnCatch",
+    value: function retryOnCatch(resolve) {
+      this.data.retryOnCatch = resolve;
+    }
+    /*
+    * Overrides the current request`s methods call chain on retry.
+    * The Function executes within a retry method.
+    * @example: ....retryChain(({set}) => set.json()
+    *   .post('http://some.url', {params})
+    *   .success(...).error(...).catch(...))
+    * @param: {Function}({set, chain, data}):<void|Array>
+    *     - @property "set" creates a new set
+    *       of the current request`s methods call
+    *       staged as an Array in a property named "retryChainSet".
+    *     - @property "chain" provides an Array
+    *       [{method, args}, {method, args}, ....]
+    *       containing the current request`s methods call chain.
+    *     - @property "data" - current request`s data.
+    * @return: void
+    * */
+
+  }, {
+    key: "retryChain",
+    value: function retryChain(callback) {
+      this.data.retryChain = callback;
+    }
+    /*
+    * Sets a max number of retry attempts
+    * @param: {Number}
+    * @return: void
+    * */
+
+  }, {
+    key: "retryMaxCount",
+    value: function retryMaxCount(count) {
+      this.data.retryMaxCount = Number.isNaN(+count) ? 0 : +count;
+    }
+    /*
+    * Sets the timeout between retry attempts
+    * @param: {Number}
+    * @return: void
+    * */
+
+  }, {
+    key: "retryTimeout",
+    value: function retryTimeout(miliseconds) {
+      this.data.retryTimeout = Number.isNaN(+miliseconds) ? 0 : +miliseconds;
+    }
+  }]);
+  return Request;
+}();
 
 exports.Request = Request;
