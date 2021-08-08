@@ -4,7 +4,7 @@ Provides a fully customizable Library for handling API using Request Repositorie
 
 ## Initialisation
 
-1. Create your own ES-6 classes extending "ClientDecorator" and "RequestHandler" from the package.
+1. Create your own ES-6 classes implementing "RequestClient" and "RequestHandler" Interfaces from the package.
 
 ```javascript
 //.......... ApiClient.js
@@ -321,7 +321,7 @@ app.request
 
 ```
 
-## Extending RequestDecorator And Mediator
+## Extending Request And RequestMiddleware
 
 By Passing argument named "extend" allows to inject any custom pre-request and post-request handling methods to
 the Base Request's prototype.
@@ -433,8 +433,9 @@ export default class extends RequestHandler {
         /*
         * (This method is Abstract (Not subject to redeclare))
         * The request restarting method.
-        * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
-        * returning Boolean that whenever is TRUE then restarts the request.
+        * @param: {Boolean}|{Function}(data):<Boolean|Promise> 
+        *     - Boolean or a Function returning both Boolean or a Promise
+        *       returning Boolean that whenever is TRUE then restarts the request.
         * @return: void
         * */
         this.retry((data) => new Promise(resolve => {
@@ -482,22 +483,24 @@ console.log(result)
 ```javascript
 
 /*
-* This method doesn't restarts the request, it brings the Function that
-* takes the request data as an argument and initiates the request restarting method.
+* This method doesn't restarts the request, 
+* it brings the Function that
+* takes the request data as an argument 
+* and initiates the request restarting method.
 * The Function executes at the end of a Promise.prototype.finally()
 * @param: {Boolean}|{Function}(data):<Boolean|Promise> 
 *     - Boolean or a Function returning both Boolean or a Promise
-*     returning Boolean that whenever is TRUE then restarts the request
+*       returning Boolean that whenever is TRUE then restarts the request
 * @return: void
 * */
 retry (resolve) {}
 
 /*
-* The request retry error handler.
+* Restarts the request on request errors.
 * The Function executes at the end of a Promise.prototype.finally()
 * @param: {Boolean}|{Function}(data):<Boolean|Promise> 
 *     - Boolean or a Function returning both Boolean or a Promise
-*     returning Boolean that whenever is TRUE then restarts the request
+*       returning Boolean that whenever is TRUE then restarts the request
 * @return: void
 * */
 retryOnCatch (resolve) {}
