@@ -127,7 +127,7 @@ var RequestRetry = /*#__PURE__*/function () {
           method: method,
           args: args
         });
-        return set();
+        return set;
       });
 
       if (request.data.retryChain instanceof Function) {

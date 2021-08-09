@@ -217,11 +217,18 @@ const app = new App();
 
     const log = app.request.getLog()
     console.log('requests logged number: ', log.length)
+
+    await app.request
+        .bg()
+        .html()
+        .encode()
+        .repo('posts')
+        .getPosts()
+        .retry(true)
+        .retryChain(({set}) => set.repo('posts').getPosts())
+        .retryMaxCount(3)
+
     console.log(log[log.length-1].data)
-
-    await app.request.bg().html().encode().repo('posts').getPosts().retry(true).retryMaxCount(3)
-
-    // await app.request.bg().html().encode().repo('posts').getPosts().retryMaxCount(3)
 
     const chain = []
     log.forEach(r => chain.push(r.chain.map(i => i.method)))

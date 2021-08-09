@@ -76,7 +76,7 @@ class RequestRetry {
         const request = this.request
         const set = proxy({}, null, (state, method, args) => {
             request.retryChainSet.push({method, args})
-            return set()
+            return set
         })
 
         if (request.data.retryChain instanceof Function) {
