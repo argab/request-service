@@ -41,6 +41,8 @@ var RequestMiddleware = /*#__PURE__*/function () {
 
     var _proxy = function _proxy(state) {
       return (0, _helpers.proxy)(state, null, function (state, method, args) {
+        var _state$_request;
+
         if (state._runRepo) {
           state._runRepo = false;
 
@@ -65,13 +67,16 @@ var RequestMiddleware = /*#__PURE__*/function () {
           return _proxy(state);
         }
 
-        if (state._service._factory._client.prototype[method] instanceof Function) {
+        var client = state._staged.client || ((_state$_request = state._request) === null || _state$_request === void 0 ? void 0 : _state$_request.data.client) || state._service._config.client;
+
+        if (state._service._factory.getClientPrototype({
+          client: client
+        }).prototype[method] instanceof Function) {
           var uri = args[0];
           var params = args[1];
 
           if (state._request) {
             state._request.chain = [];
-            state._request.retryChainSet = [];
             state._request.data = (0, _helpers.mergeDeep)(state._request.data, state._staged);
             Object.assign(state._request.data, {
               method: method,
@@ -96,7 +101,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
             repo: state._repo,
             repoPath: state._repoPath
           });
-          var dispatcher = new state._service._dispatcher({
+          var manager = new state._service._manager({
             request: state._request,
             service: state._service
           });
@@ -107,9 +112,9 @@ var RequestMiddleware = /*#__PURE__*/function () {
           });
 
           state._request.chain = state._chain;
-          state._request.data.retry || state._request.data.retryOnCatch || dispatcher.push();
-          dispatcher.send();
-          return dispatcher.fetch();
+          state._request.data.retry || state._request.data.retryOnCatch || manager.save();
+          manager.send();
+          return manager.fetch();
         }
 
         if (state[method] instanceof Function) {

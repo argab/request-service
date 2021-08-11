@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AbstractRequest = exports.Request = exports.RequestService = void 0;
+exports.AbstractRequest = exports.Request = exports.RequestService = exports.REQUEST_RESOLVE_METHODS = void 0;
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
@@ -27,7 +27,7 @@ var _RequestMiddleware = require("./RequestMiddleware");
 
 var _Decorators = require("./Decorators");
 
-var _RequestDispatcher = require("./RequestDispatcher");
+var _RequestManager = require("./RequestManager");
 
 var _RequestRetry = require("./RequestRetry");
 
@@ -46,7 +46,7 @@ var AbstractRequest = /*#__PURE__*/function () {
     (0, _classCallCheck2["default"])(this, AbstractRequest);
     (0, _defineProperty2["default"])(this, "_requests", []);
     (0, _defineProperty2["default"])(this, "_factory", void 0);
-    (0, _defineProperty2["default"])(this, "_dispatcher", void 0);
+    (0, _defineProperty2["default"])(this, "_manager", void 0);
     (0, _defineProperty2["default"])(this, "_middleware", void 0);
     (0, _defineProperty2["default"])(this, "_retry", void 0);
     (0, _defineProperty2["default"])(this, "_getRepo", void 0);
@@ -67,10 +67,6 @@ var AbstractRequest = /*#__PURE__*/function () {
       params: {},
       method: 'get',
       statusCode: 0,
-      success: null,
-      error: null,
-      "finally": null,
-      "catch": null,
       retry: null,
       retryOnCatch: null,
       retryChain: null,
@@ -122,9 +118,9 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         useStubs = _ref.useStubs,
         extend = _ref.extend,
         factory = _ref.factory,
-        dispatcher = _ref.dispatcher,
+        manager = _ref.manager,
         middleware = _ref.middleware,
-        requestDecorator = _ref.requestDecorator,
+        request = _ref.request,
         requestRetry = _ref.requestRetry;
     (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
@@ -136,13 +132,13 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     };
     _this._useStubs = Boolean(useStubs);
     _this._factory = (0, _helpers.isPrototype)(_RequestFactory.RequestFactory, factory) ? factory : _RequestFactory.RequestFactory;
-    _this._dispatcher = (0, _helpers.isPrototype)(_RequestDispatcher.RequestDispatcher, dispatcher) ? dispatcher : _RequestDispatcher.RequestDispatcher;
+    _this._manager = (0, _helpers.isPrototype)(_RequestManager.RequestManager, manager) ? manager : _RequestManager.RequestManager;
     _this._middleware = (0, _helpers.isPrototype)(_RequestMiddleware.RequestMiddleware, middleware) ? middleware : _Decorators.RequestMiddlewareDecorator;
     _this._retry = (0, _helpers.isPrototype)(_RequestRetry.RequestRetry, requestRetry) ? requestRetry : _RequestRetry.RequestRetry;
     config instanceof Object && Object.assign(_this._config, config);
     extend instanceof Object && Object.assign(_this._extend, extend);
     _this._factory = new _this._factory({
-      requestDecorator: requestDecorator,
+      request: request,
       service: (0, _assertThisInitialized2["default"])(_this)
     });
 
@@ -195,27 +191,65 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
 }(AbstractRequest);
 
 exports.RequestService = RequestService;
+var REQUEST_RESOLVE_METHODS = ['then', 'catch', 'finally', 'success', 'error'];
+exports.REQUEST_RESOLVE_METHODS = REQUEST_RESOLVE_METHODS;
 
 var Request = /*#__PURE__*/function () {
   function Request(data) {
     (0, _classCallCheck2["default"])(this, Request);
     (0, _defineProperty2["default"])(this, "data", {});
     (0, _defineProperty2["default"])(this, "chain", []);
-    (0, _defineProperty2["default"])(this, "retryChainSet", []);
-    (0, _defineProperty2["default"])(this, "_methods", ['retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']);
+    (0, _defineProperty2["default"])(this, "_methods", ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']);
+    (0, _defineProperty2["default"])(this, "_fetch", void 0);
+    (0, _defineProperty2["default"])(this, "_resolve", void 0);
     this.data = data;
   }
   /*
-  * This method doesn't restarts the request, it brings the Function that
-  * takes the request data as an argument and initiates the request restarting method.
-  * The Function executes at the end of a Promise.prototype.finally()
-  * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
-  * returning Boolean that whenever is TRUE then restarts the request
-  * @return: void
+  * Method is Abstract.
   * */
 
 
   (0, _createClass2["default"])(Request, [{
+    key: "then",
+    value: function then(callback) {}
+    /*
+    * Method is Abstract.
+    * */
+
+  }, {
+    key: "catch",
+    value: function _catch(callback) {}
+    /*
+    * Method is Abstract.
+    * */
+
+  }, {
+    key: "finally",
+    value: function _finally(callback) {}
+    /*
+    * Method is Abstract.
+    * */
+
+  }, {
+    key: "success",
+    value: function success(callback) {}
+    /*
+    * Method is Abstract.
+    * */
+
+  }, {
+    key: "error",
+    value: function error(callback) {}
+    /*
+    * This method doesn't restarts the request, it brings the Function that
+    * takes the request data as an argument and initiates the request restarting method.
+    * The Function executes at the end of a Promise.prototype.finally()
+    * @param: {Boolean}|{Function}(data):<Boolean|Promise> Boolean or a Function returning both Boolean or a Promise
+    * returning Boolean that whenever is TRUE then restarts the request
+    * @return: void
+    * */
+
+  }, {
     key: "retry",
     value: function retry(resolve) {
       this.data.retry = resolve;
@@ -241,8 +275,7 @@ var Request = /*#__PURE__*/function () {
     *   .success(...).error(...).catch(...))
     * @param: {Function}({set, chain, data}):<void|Array>
     *     - @property "set" creates a new set
-    *       of the current request`s methods call
-    *       staged as an Array in a property named "retryChainSet".
+    *       of the current request`s methods call.
     *     - @property "chain" provides an Array
     *       [{method, args}, {method, args}, ....]
     *       containing the current request`s methods call chain.

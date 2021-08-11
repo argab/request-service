@@ -1,5 +1,4 @@
-import {Request} from "./Request"
-import {RequestMiddleware} from "./RequestMiddleware";
+import {RequestMiddleware} from "./RequestMiddleware"
 
 class RequestMiddlewareDecorator extends RequestMiddleware {
 
@@ -45,32 +44,5 @@ class RequestMiddlewareDecorator extends RequestMiddleware {
 
 }
 
-class RequestDecorator extends Request {
 
-    constructor(data) {
-        super(data)
-        this._methods = this._methods.concat(['success', 'then', 'error', 'catch', 'finally'])
-    }
-
-    success(callback) {
-        this.data.success = callback
-    }
-
-    then(callback) {
-        this.data.success = callback
-    }
-
-    error(callback) {
-        this.data.error = callback
-    }
-
-    catch(callback) {
-        this.data.catch = callback
-    }
-
-    finally(callback) {
-        this.data.finally = callback
-    }
-}
-
-export {RequestDecorator, RequestMiddlewareDecorator}
+export {RequestMiddlewareDecorator}

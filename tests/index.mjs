@@ -43,7 +43,7 @@ class Handler extends RequestHandler {
     }
 
     onCatch(error) {
-        console.error(error)
+        console.error(`handler onCatch: `, error)
     }
 
     isSuccess(response) {
@@ -188,18 +188,18 @@ const app = new App();
 
     await app.getCommentsStub()
 
-    const result = await app.request.html()
+    let result = await app.request.html()
         .awesome()
         .get('/posts')
         .success(() => { throw 'Oooooops!' })
         .done('Wow, that`s awesome!')
         .alert('Ooops...')
-        // .finally(() => {
-        //     console.error('finally All done.')
-        // })
+        .finally(() => {
+            console.error('finally All done.')
+        })
         .retryMaxCount(1)
         .retryTimeout(3000)
-        // .retry(true)
+        .retry(true)
         .retryChain(({chain}) => {
             chain.push({method: 'success', args: [() => {console.error('Good!')}]})
             return chain
@@ -214,24 +214,43 @@ const app = new App();
         })
 
     console.error(result)
-
+    //
     const log = app.request.getLog()
     console.log('requests logged number: ', log.length)
 
-    await app.request
+    result = await app.request
         .bg()
         .html()
         .encode()
         .repo('posts')
         .getPosts()
+        .success(() => {
+            console.error('SUCCESS RESULT: ', 'retry result')
+            return 'retry result'
+        })
         .retry(true)
         .retryChain(({set}) => set.repo('posts').getPosts())
         .retryMaxCount(3)
 
-    console.log(log[log.length-1].data)
+    console.error('RESULT: ', result)
 
     const chain = []
     log.forEach(r => chain.push(r.chain.map(i => i.method)))
     console.log(prettyFormat(chain))
+
+    result = await app.request
+        .repo('posts')
+        .getPosts()
+        .success(() => {throw 'testing errors.'})
+        .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
+        .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
+        .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
+        .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
+        .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
+        .finally((data) => data)
+
+    console.error('RESULT: ', result)
+
+    console.log(log[log.length-1].data)
 
 })();

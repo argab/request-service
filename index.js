@@ -5,10 +5,9 @@ const {
     RequestRepository,
     RequestLoader,
     RequestClient,
-    RequestDecorator,
     RequestMiddleware,
     RequestMiddlewareDecorator,
-    RequestDispatcher,
+    RequestManager,
     RequestHandler,
     RequestFactory,
     RequestRetry
@@ -21,10 +20,9 @@ module.exports = {
     RequestRepository,
     RequestLoader,
     RequestClient,
-    RequestDecorator,
     RequestMiddleware,
     RequestMiddlewareDecorator,
-    RequestDispatcher,
+    RequestManager,
     RequestHandler,
     RequestFactory,
     RequestRetry

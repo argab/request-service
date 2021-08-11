@@ -9,12 +9,6 @@ Object.defineProperty(exports, "RequestMiddlewareDecorator", {
     return _Decorators.RequestMiddlewareDecorator;
   }
 });
-Object.defineProperty(exports, "RequestDecorator", {
-  enumerable: true,
-  get: function get() {
-    return _Decorators.RequestDecorator;
-  }
-});
 Object.defineProperty(exports, "RequestHandler", {
   enumerable: true,
   get: function get() {
@@ -69,10 +63,10 @@ Object.defineProperty(exports, "RequestMiddleware", {
     return _RequestMiddleware.RequestMiddleware;
   }
 });
-Object.defineProperty(exports, "RequestDispatcher", {
+Object.defineProperty(exports, "RequestManager", {
   enumerable: true,
   get: function get() {
-    return _RequestDispatcher.RequestDispatcher;
+    return _RequestManager.RequestManager;
   }
 });
 Object.defineProperty(exports, "RequestRetry", {
@@ -92,6 +86,6 @@ var _RequestFactory = require("./RequestFactory");
 
 var _RequestMiddleware = require("./RequestMiddleware");
 
-var _RequestDispatcher = require("./RequestDispatcher");
+var _RequestManager = require("./RequestManager");
 
 var _RequestRetry = require("./RequestRetry");

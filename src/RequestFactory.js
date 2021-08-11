@@ -1,6 +1,5 @@
 import {RequestClient, RequestHandler, RequestLoader} from "./Interfaces"
 import {AbstractRequest, Request} from "./Request"
-import {RequestDecorator} from "./Decorators"
 import {isPrototype} from "./helpers"
 
 class RequestFactory {
@@ -10,11 +9,10 @@ class RequestFactory {
     _request
     _service
 
-    constructor({client, handler, requestDecorator, service}) {
+    constructor({client, handler, request, service}) {
         this._handler = isPrototype(RequestHandler, handler) ? handler : RequestHandler
         this._client = isPrototype(RequestClient, client) ? client : RequestClient
-        this._request = isPrototype(Request, requestDecorator) ? requestDecorator : RequestDecorator
-
+        this._request = isPrototype(Request, request) ? request : Request
         AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(service || {})) && (this._service = service)
     }
 
@@ -34,8 +32,12 @@ class RequestFactory {
     }
 
     getClient(data) {
-        const client = isPrototype(RequestClient, data.client) ? data.client : this._client
+        const client = this.getClientPrototype(data)
         return new client(data)
+    }
+
+    getClientPrototype(data) {
+        return isPrototype(RequestClient, data.client) ? data.client : this._client
     }
 
     getHandlers(data, appendDataFunc) {

@@ -58,30 +58,33 @@ var RequestRetry = /*#__PURE__*/function () {
 
                 if (this.resolve !== undefined) {
                   resolve = this.resolve;
-                  this.retryUnset();
                 } else {
                   resolve = request.data.retryOnCatch && request.data.dataError ? request.data.retryOnCatch : null;
                   resolve === null && (resolve = request.data.retry || null);
                 }
 
-                retry = resolve === true || (resolve instanceof Function ? resolve(request.data) : false);
-                _context.t0 = retry instanceof Promise;
+                retry = resolve instanceof Function ? resolve(request.data) : resolve;
 
-                if (!_context.t0) {
-                  _context.next = 8;
+                if (!(retry instanceof Promise)) {
+                  _context.next = 9;
                   break;
                 }
 
-                _context.next = 7;
+                _context.next = 6;
                 return retry;
 
-              case 7:
-                retry = _context.sent;
-
-              case 8:
-                return _context.abrupt("return", retry);
+              case 6:
+                _context.t0 = _context.sent;
+                _context.next = 10;
+                break;
 
               case 9:
+                _context.t0 = retry;
+
+              case 10:
+                return _context.abrupt("return", _context.t0);
+
+              case 11:
               case "end":
                 return _context.stop();
             }
@@ -96,20 +99,13 @@ var RequestRetry = /*#__PURE__*/function () {
       return getRetry;
     }()
   }, {
-    key: "retryUnset",
-    value: function retryUnset() {
-      this.request.data.retry = null;
-      this.request.data.retryOnCatch = null;
-    }
-  }, {
     key: "retryChain",
     value: function retryChain() {
       this.setRetryChain();
       var request = this.request;
-      var chain = request.retryChainSet.length ? request.retryChainSet : request.chain;
+      var chain = request.chain;
       var middleware = new this.service._middleware(this.service, request);
       request.chain = [];
-      request.retryChainSet = [];
       var pipe = middleware[chain[0].method](chain[0].args[0], chain[0].args[1], chain[0].args[2], chain[0].args[3]);
       chain.shift();
       chain.forEach(function (_ref2) {
@@ -123,7 +119,7 @@ var RequestRetry = /*#__PURE__*/function () {
     value: function setRetryChain() {
       var request = this.request;
       var set = (0, _helpers.proxy)({}, null, function (state, method, args) {
-        request.retryChainSet.push({
+        request.chain.push({
           method: method,
           args: args
         });
@@ -131,13 +127,17 @@ var RequestRetry = /*#__PURE__*/function () {
       });
 
       if (request.data.retryChain instanceof Function) {
-        request.retryChainSet = [];
-        var chain = request.data.retryChain({
+        var chain = (0, _toConsumableArray2["default"])(request.chain);
+        request.chain = [];
+
+        var _chain = request.data.retryChain({
           set: set,
-          chain: (0, _toConsumableArray2["default"])(request.chain),
+          chain: chain,
           data: request.data
         });
-        Array.isArray(chain) && (request.retryChainSet = chain);
+
+        Array.isArray(_chain) && (request.chain = _chain);
+        request.chain.length || (request.chain = chain);
       }
     }
   }, {
@@ -160,7 +160,7 @@ var RequestRetry = /*#__PURE__*/function () {
                   break;
                 }
 
-                return _context2.abrupt("return", this.retryUnset(request));
+                return _context2.abrupt("return", request._resolve());
 
               case 5:
                 _context2.next = 7;
@@ -174,7 +174,7 @@ var RequestRetry = /*#__PURE__*/function () {
                   break;
                 }
 
-                return _context2.abrupt("return", this.retryUnset(request));
+                return _context2.abrupt("return", request._resolve());
 
               case 10:
                 Object.assign(request.data, {

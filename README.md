@@ -452,12 +452,9 @@ export default class extends RequestHandler {
         this.retry(data => {
             // changing the original request (optional):
             data.retryChain = ({chain}) => {
-                chain.push({
-                    method: 'error', 
-                    args: [
-                        () => {console.log('"error" method has been overriden.')}
-                    ]
-                })
+                chain.find(c => c.method === 'error').args[0] = () => {
+                    console.log('"error" method has been overriden.')
+                }
                 return chain
             }
             //...do some logic and restart the request:
@@ -476,12 +473,9 @@ const result = await app.request
     .retryTimeout(3000)
     // .retry(true)
     .retryChain(({chain}) => {
-        chain.push({
-            method: 'error', 
-            args: [
-                () => {console.log('"error" method has been overriden.')}
-            ]
-        })
+        chain.find(c => c.method === 'error').args[0] = () => {
+            console.log('"error" method has been overriden.')
+        }
         return chain
     })
     .retryOnCatch(data => {
@@ -533,8 +527,7 @@ retryOnCatch (resolve) {}
 *   .success(...).error(...).catch(...))
 * @param: {Function}({set, chain, data}):<void|Array>
 *     - @property "set" creates a new set
-*       of the current request`s methods call chain
-*       staged as an Array in a property named "retryChainSet".
+*       of the current request`s methods call chain.
 *     - @property "chain" provides an Array
 *       [{method, args}, {method, args}, ....]
 *       containing the current request`s methods call chain.

@@ -17,8 +17,6 @@ var _Interfaces = require("./Interfaces");
 
 var _Request = require("./Request");
 
-var _Decorators = require("./Decorators");
-
 var _helpers = require("./helpers");
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
@@ -29,7 +27,7 @@ var RequestFactory = /*#__PURE__*/function () {
   function RequestFactory(_ref) {
     var client = _ref.client,
         handler = _ref.handler,
-        requestDecorator = _ref.requestDecorator,
+        request = _ref.request,
         service = _ref.service;
     (0, _classCallCheck2["default"])(this, RequestFactory);
     (0, _defineProperty2["default"])(this, "_handler", void 0);
@@ -38,7 +36,7 @@ var RequestFactory = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_service", void 0);
     this._handler = (0, _helpers.isPrototype)(_Interfaces.RequestHandler, handler) ? handler : _Interfaces.RequestHandler;
     this._client = (0, _helpers.isPrototype)(_Interfaces.RequestClient, client) ? client : _Interfaces.RequestClient;
-    this._request = (0, _helpers.isPrototype)(_Request.Request, requestDecorator) ? requestDecorator : _Decorators.RequestDecorator;
+    this._request = (0, _helpers.isPrototype)(_Request.Request, request) ? request : _Request.Request;
     _Request.AbstractRequest.prototype.isPrototypeOf(Object.getPrototypeOf(service || {})) && (this._service = service);
   }
 
@@ -70,8 +68,13 @@ var RequestFactory = /*#__PURE__*/function () {
   }, {
     key: "getClient",
     value: function getClient(data) {
-      var client = (0, _helpers.isPrototype)(_Interfaces.RequestClient, data.client) ? data.client : this._client;
+      var client = this.getClientPrototype(data);
       return new client(data);
+    }
+  }, {
+    key: "getClientPrototype",
+    value: function getClientPrototype(data) {
+      return (0, _helpers.isPrototype)(_Interfaces.RequestClient, data.client) ? data.client : this._client;
     }
   }, {
     key: "getHandlers",

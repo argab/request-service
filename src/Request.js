@@ -1,7 +1,7 @@
 import {RequestFactory} from "./RequestFactory"
 import {RequestMiddleware} from "./RequestMiddleware"
 import {RequestMiddlewareDecorator} from "./Decorators"
-import {RequestDispatcher} from "./RequestDispatcher"
+import {RequestManager} from "./RequestManager"
 import {RequestRetry} from "./RequestRetry"
 import {proxy, isPrototype} from "./helpers"
 
@@ -9,7 +9,7 @@ class AbstractRequest {
 
     _requests = []
     _factory
-    _dispatcher
+    _manager
     _middleware
     _retry
 
@@ -30,10 +30,6 @@ class AbstractRequest {
         params: {},
         method: 'get',
         statusCode: 0,
-        success: null,
-        error: null,
-        finally: null,
-        catch: null,
         retry: null,
         retryOnCatch: null,
         retryChain: null,
@@ -69,20 +65,20 @@ class AbstractRequest {
 
 class RequestService extends AbstractRequest {
 
-    constructor({config, getRepo, getStub, useStubs, extend, factory, dispatcher, middleware, requestDecorator, requestRetry}) {
+    constructor({config, getRepo, getStub, useStubs, extend, factory, manager, middleware, request, requestRetry}) {
         super()
         this._getRepo = getRepo instanceof Function ? getRepo : () => null
         this._getStub = getStub instanceof Function ? getStub : () => null
         this._useStubs = Boolean(useStubs)
         this._factory = isPrototype(RequestFactory, factory) ? factory : RequestFactory
-        this._dispatcher = isPrototype(RequestDispatcher, dispatcher) ? dispatcher : RequestDispatcher
+        this._manager = isPrototype(RequestManager, manager) ? manager : RequestManager
         this._middleware = isPrototype(RequestMiddleware, middleware) ? middleware : RequestMiddlewareDecorator
         this._retry = isPrototype(RequestRetry, requestRetry) ? requestRetry : RequestRetry
 
         config instanceof Object && Object.assign(this._config, config)
         extend instanceof Object && Object.assign(this._extend, extend)
 
-        this._factory = new this._factory({requestDecorator, service: this})
+        this._factory = new this._factory({request, service: this})
 
         const _extend = this.extends().middleware
         _extend instanceof Object && Object.keys(_extend).forEach(key => {
@@ -122,16 +118,49 @@ class RequestService extends AbstractRequest {
     }
 }
 
+export const REQUEST_RESOLVE_METHODS = ['then', 'catch', 'finally', 'success', 'error']
+
 class Request {
 
     data = {}
     chain = []
-    retryChainSet = []
 
-    _methods = ['retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
+    _methods = ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
+    _fetch
+    _resolve
 
     constructor(data) {
         this.data = data
+    }
+
+    /*
+    * Method is Abstract.
+    * */
+    then(callback) {
+    }
+
+    /*
+    * Method is Abstract.
+    * */
+    catch(callback) {
+    }
+
+    /*
+    * Method is Abstract.
+    * */
+    finally(callback) {
+    }
+
+    /*
+    * Method is Abstract.
+    * */
+    success(callback) {
+    }
+
+    /*
+    * Method is Abstract.
+    * */
+    error(callback) {
     }
 
     /*
@@ -165,8 +194,7 @@ class Request {
     *   .success(...).error(...).catch(...))
     * @param: {Function}({set, chain, data}):<void|Array>
     *     - @property "set" creates a new set
-    *       of the current request`s methods call
-    *       staged as an Array in a property named "retryChainSet".
+    *       of the current request`s methods call.
     *     - @property "chain" provides an Array
     *       [{method, args}, {method, args}, ....]
     *       containing the current request`s methods call chain.

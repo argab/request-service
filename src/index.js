@@ -1,9 +1,9 @@
-import {RequestMiddlewareDecorator, RequestDecorator} from "./Decorators"
+import {RequestMiddlewareDecorator} from "./Decorators"
 import {RequestHandler, RequestRepository, RequestLoader, RequestClient} from "./Interfaces"
 import {Request, AbstractRequest, RequestService} from "./Request"
 import {RequestFactory} from "./RequestFactory"
 import {RequestMiddleware} from "./RequestMiddleware"
-import {RequestDispatcher} from "./RequestDispatcher"
+import {RequestManager} from "./RequestManager"
 import {RequestRetry} from "./RequestRetry"
 
 export {
@@ -13,10 +13,9 @@ export {
     RequestRepository,
     RequestLoader,
     RequestClient,
-    RequestDecorator,
     RequestMiddleware,
     RequestMiddlewareDecorator,
-    RequestDispatcher,
+    RequestManager,
     RequestHandler,
     RequestFactory,
     RequestRetry

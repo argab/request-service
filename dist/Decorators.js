@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RequestMiddlewareDecorator = exports.RequestDecorator = void 0;
+exports.RequestMiddlewareDecorator = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -16,8 +16,6 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _Request2 = require("./Request");
 
 var _RequestMiddleware2 = require("./RequestMiddleware");
 
@@ -122,48 +120,3 @@ var RequestMiddlewareDecorator = /*#__PURE__*/function (_RequestMiddleware) {
 }(_RequestMiddleware2.RequestMiddleware);
 
 exports.RequestMiddlewareDecorator = RequestMiddlewareDecorator;
-
-var RequestDecorator = /*#__PURE__*/function (_Request) {
-  (0, _inherits2["default"])(RequestDecorator, _Request);
-
-  var _super2 = _createSuper(RequestDecorator);
-
-  function RequestDecorator(data) {
-    var _this;
-
-    (0, _classCallCheck2["default"])(this, RequestDecorator);
-    _this = _super2.call(this, data);
-    _this._methods = _this._methods.concat(['success', 'then', 'error', 'catch', 'finally']);
-    return _this;
-  }
-
-  (0, _createClass2["default"])(RequestDecorator, [{
-    key: "success",
-    value: function success(callback) {
-      this.data.success = callback;
-    }
-  }, {
-    key: "then",
-    value: function then(callback) {
-      this.data.success = callback;
-    }
-  }, {
-    key: "error",
-    value: function error(callback) {
-      this.data.error = callback;
-    }
-  }, {
-    key: "catch",
-    value: function _catch(callback) {
-      this.data["catch"] = callback;
-    }
-  }, {
-    key: "finally",
-    value: function _finally(callback) {
-      this.data["finally"] = callback;
-    }
-  }]);
-  return RequestDecorator;
-}(_Request2.Request);
-
-exports.RequestDecorator = RequestDecorator;

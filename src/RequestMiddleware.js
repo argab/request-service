@@ -42,14 +42,15 @@ class RequestMiddleware {
                 return _proxy(state)
             }
 
-            if (state._service._factory._client.prototype[method] instanceof Function) {
+            const client = state._staged.client || state._request?.data.client || state._service._config.client
+
+            if (state._service._factory.getClientPrototype({client}).prototype[method] instanceof Function) {
 
                 const uri = args[0]
                 const params = args[1]
 
                 if (state._request) {
                     state._request.chain = []
-                    state._request.retryChainSet = []
                     state._request.data = mergeDeep(state._request.data, state._staged)
                     Object.assign(state._request.data, {
                         method,
@@ -75,17 +76,17 @@ class RequestMiddleware {
                     repoPath: state._repoPath,
                 })
 
-                const dispatcher = new state._service._dispatcher({
+                const manager = new state._service._manager({
                     request: state._request,
                     service: state._service
                 })
 
                 state._chain.push({method, args})
                 state._request.chain = state._chain
-                state._request.data.retry || state._request.data.retryOnCatch || dispatcher.push()
+                state._request.data.retry || state._request.data.retryOnCatch || manager.save()
 
-                dispatcher.send()
-                return dispatcher.fetch()
+                manager.send()
+                return manager.fetch()
 
             }
 
