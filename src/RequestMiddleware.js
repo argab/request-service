@@ -83,7 +83,7 @@ class RequestMiddleware {
 
                 state._chain.push({method, args})
                 state._request.chain = state._chain
-                state._request.data.retry || state._request.data.retryOnCatch || manager.save()
+                state._request._fetch || manager.save()
 
                 manager.send()
                 return manager.fetch()
