@@ -109,12 +109,16 @@ var RequestManager = /*#__PURE__*/function () {
               switch (_context.prev = _context.next) {
                 case 0:
                   _context.next = 2;
-                  return _this2.onResponse(response, handlers);
+                  return _this2.setResult(response);
 
                 case 2:
-                  data.statusCode || (data.statusCode = 200);
+                  _context.next = 4;
+                  return _this2.onResponse(response, handlers);
 
-                case 3:
+                case 4:
+                  data.statusCode || _this2.setStatusCode(response, 200);
+
+                case 5:
                 case "end":
                   return _context.stop();
               }
@@ -137,7 +141,7 @@ var RequestManager = /*#__PURE__*/function () {
                   return _this2.onCatch(error, handlers);
 
                 case 3:
-                  data.statusCode || (data.statusCode = 500);
+                  data.statusCode || _this2.setStatusCode(error, 500);
 
                 case 4:
                 case "end":
@@ -163,7 +167,7 @@ var RequestManager = /*#__PURE__*/function () {
                 return _this2.onFinally(handlers);
 
               case 3:
-                data.statusCode || (data.statusCode = 200);
+                data.statusCode || _this2.setStatusCode(null, 200);
                 retry = _this2._retry instanceof Function ? _this2._retry() : _this2.retry();
                 retry === false && _this2._request._resolve();
 
@@ -599,6 +603,12 @@ var RequestManager = /*#__PURE__*/function () {
 
       return setResult;
     }()
+  }, {
+    key: "setStatusCode",
+    value: function setStatusCode(source, def) {
+      def = Number.isNaN(+def) ? 0 : +def;
+      this._request.data.statusCode = Number.isNaN(+(source === null || source === void 0 ? void 0 : source.status)) ? def : +source.status;
+    }
   }, {
     key: "retry",
     value: function retry(resolve) {

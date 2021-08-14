@@ -51,24 +51,27 @@ class RequestManager {
 
         const {data, handlers, dataClient, getLoader} = this.fetchData()
         const promise = dataClient instanceof Promise ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
+
         getLoader()?.start()
 
         promise.then(async response => {
 
+            await this.setResult(response)
             await this.onResponse(response, handlers)
-            data.statusCode || (data.statusCode = 200)
+            data.statusCode || (this.setStatusCode(response, 200))
 
         }).catch(async error => {
 
             this.setError(error)
             await this.onCatch(error, handlers)
-            data.statusCode || (data.statusCode = 500)
+            data.statusCode || (this.setStatusCode(error, 500))
 
         }).finally(async () => {
 
             getLoader()?.end()
+
             await this.onFinally(handlers)
-            data.statusCode || (data.statusCode = 200)
+            data.statusCode || (this.setStatusCode(null, 200))
 
             const retry = this._retry instanceof Function ? this._retry() : this.retry()
             retry === false && this._request._resolve()
@@ -192,6 +195,11 @@ class RequestManager {
 
     async setResult(result) {
         result === undefined || (this._request.data.result = result instanceof Promise ? await result : result)
+    }
+
+    setStatusCode(source, def) {
+        def = Number.isNaN(+def) ? 0 : +def
+        this._request.data.statusCode = Number.isNaN(+source?.status) ? def : +source.status
     }
 
     retry(resolve) {
