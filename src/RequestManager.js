@@ -58,20 +58,20 @@ class RequestManager {
 
             await this.setResult(response)
             await this.onResponse(response, handlers)
-            data.statusCode || (this.setStatusCode(response, 200))
+            data.statusCode || this.setStatusCode(response, 200)
 
         }).catch(async error => {
 
             this.setError(error)
             await this.onCatch(error, handlers)
-            data.statusCode || (this.setStatusCode(error, 500))
+            data.statusCode || this.setStatusCode(error, 500)
 
         }).finally(async () => {
 
             getLoader()?.end()
 
             await this.onFinally(handlers)
-            data.statusCode || (this.setStatusCode(null, 200))
+            data.statusCode || this.setStatusCode(null, 200)
 
             const retry = this._retry instanceof Function ? this._retry() : this.retry()
             retry === false && this._request._resolve()
