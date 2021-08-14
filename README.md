@@ -492,7 +492,7 @@ console.log(result)
 
 ```
 
-####Retry Methods:
+###Retry Methods:
 
 ```javascript
 
