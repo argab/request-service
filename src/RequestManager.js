@@ -84,9 +84,14 @@ class RequestManager {
 
         request._fetch = new Promise(resolve => request._resolve = () => resolve(request.data.result))
         request._methods.forEach(method => request[method] instanceof Function && (request._fetch[method] = (arg) => {
+
+            if (REQUEST_RESOLVE_METHODS.includes(method)) {
+                arg instanceof Function || (arg = () => undefined)
+            } else request[method](arg)
+
             this._resolve.push({method, arg})
             request.chain.push({method, args: [arg]})
-            REQUEST_RESOLVE_METHODS.includes(method) || request[method](arg)
+
             return request._fetch
         }))
 
@@ -115,7 +120,7 @@ class RequestManager {
             const fetch = async (data) => {
                 if (source.length === 0) return resolve(true)
                 try {
-                    await this.setResult(source[0].arg(data))
+                    source[0].arg instanceof Function && await this.setResult(source[0].arg(data))
                 } catch (err) {
                     await this.handleError(err, handlers)
                 }
@@ -143,7 +148,7 @@ class RequestManager {
                 if (onCatch.length === 0) return resolve()
                 try {
                     this.setError(error)
-                    await this.setResult(onCatch[0].arg(error))
+                    onCatch[0].arg instanceof Function && await this.setResult(onCatch[0].arg(error))
                 } catch (err) {
                     this.setError(err)
                     await this.setResult(this.resolveHandlers(err, handlers, 'onCatch'))

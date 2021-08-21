@@ -194,6 +194,12 @@ var RequestManager = /*#__PURE__*/function () {
 
       request._methods.forEach(function (method) {
         return request[method] instanceof Function && (request._fetch[method] = function (arg) {
+          if (_Request.REQUEST_RESOLVE_METHODS.includes(method)) {
+            arg instanceof Function || (arg = function arg() {
+              return undefined;
+            });
+          } else request[method](arg);
+
           _this3._resolve.push({
             method: method,
             arg: arg
@@ -203,7 +209,6 @@ var RequestManager = /*#__PURE__*/function () {
             method: method,
             args: [arg]
           });
-          _Request.REQUEST_RESOLVE_METHODS.includes(method) || request[method](arg);
           return request._fetch;
         });
       });
@@ -262,30 +267,37 @@ var RequestManager = /*#__PURE__*/function () {
 
                             case 2:
                               _context4.prev = 2;
-                              _context4.next = 5;
+                              _context4.t0 = source[0].arg instanceof Function;
+
+                              if (!_context4.t0) {
+                                _context4.next = 7;
+                                break;
+                              }
+
+                              _context4.next = 7;
                               return _this4.setResult(source[0].arg(data));
 
-                            case 5:
-                              _context4.next = 11;
+                            case 7:
+                              _context4.next = 13;
                               break;
 
-                            case 7:
-                              _context4.prev = 7;
-                              _context4.t0 = _context4["catch"](2);
-                              _context4.next = 11;
-                              return _this4.handleError(_context4.t0, handlers);
+                            case 9:
+                              _context4.prev = 9;
+                              _context4.t1 = _context4["catch"](2);
+                              _context4.next = 13;
+                              return _this4.handleError(_context4.t1, handlers);
 
-                            case 11:
+                            case 13:
                               source.shift();
-                              _context4.next = 14;
+                              _context4.next = 16;
                               return fetch(_this4._request.data.result);
 
-                            case 14:
+                            case 16:
                             case "end":
                               return _context4.stop();
                           }
                         }
-                      }, _callee4, null, [[2, 7]]);
+                      }, _callee4, null, [[2, 9]]);
                     }));
 
                     return function fetch(_x4) {
@@ -357,36 +369,43 @@ var RequestManager = /*#__PURE__*/function () {
 
                               _this5.setError(error);
 
-                              _context6.next = 6;
+                              _context6.t0 = onCatch[0].arg instanceof Function;
+
+                              if (!_context6.t0) {
+                                _context6.next = 8;
+                                break;
+                              }
+
+                              _context6.next = 8;
                               return _this5.setResult(onCatch[0].arg(error));
 
-                            case 6:
-                              _context6.next = 14;
+                            case 8:
+                              _context6.next = 16;
                               break;
 
-                            case 8:
-                              _context6.prev = 8;
-                              _context6.t0 = _context6["catch"](2);
+                            case 10:
+                              _context6.prev = 10;
+                              _context6.t1 = _context6["catch"](2);
 
-                              _this5.setError(_context6.t0);
+                              _this5.setError(_context6.t1);
 
-                              _context6.next = 13;
-                              return _this5.setResult(_this5.resolveHandlers(_context6.t0, handlers, 'onCatch'));
+                              _context6.next = 15;
+                              return _this5.setResult(_this5.resolveHandlers(_context6.t1, handlers, 'onCatch'));
 
-                            case 13:
-                              error = _context6.t0;
+                            case 15:
+                              error = _context6.t1;
 
-                            case 14:
+                            case 16:
                               onCatch.shift();
-                              _context6.next = 17;
+                              _context6.next = 19;
                               return fetch(error);
 
-                            case 17:
+                            case 19:
                             case "end":
                               return _context6.stop();
                           }
                         }
-                      }, _callee6, null, [[2, 8]]);
+                      }, _callee6, null, [[2, 10]]);
                     }));
 
                     return function fetch(_x6) {
