@@ -63,7 +63,7 @@ class RequestManager {
         }).catch(async error => {
 
             this.setError(error)
-            await this.onCatch(error, handlers)
+            await this.handleError(error, handlers)
             data.statusCode || this.setStatusCode(error, 500)
 
         }).finally(async () => {
@@ -134,6 +134,8 @@ class RequestManager {
 
     handleError(error, handlers) {
 
+        this.resolveHandlers(error, handlers, 'afterCatch')
+
         return new Promise(async resolve => {
 
             const onCatch = this._resolve.filter(r => r.method === 'catch')
@@ -184,11 +186,6 @@ class RequestManager {
             const resolved = await this.resolveRequest(['error'], response, handlers)
             resolved || await this.setResult(this.resolveHandlers(response, handlers, 'onError'))
         }
-    }
-
-    async onCatch(error, handlers) {
-        this.resolveHandlers(error, handlers, 'afterCatch')
-        await this.handleError(error, handlers)
     }
 
     async onFinally(handlers) {

@@ -138,7 +138,7 @@ var RequestManager = /*#__PURE__*/function () {
                   _this2.setError(error);
 
                   _context2.next = 3;
-                  return _this2.onCatch(error, handlers);
+                  return _this2.handleError(error, handlers);
 
                 case 3:
                   data.statusCode || _this2.setStatusCode(error, 500);
@@ -326,6 +326,7 @@ var RequestManager = /*#__PURE__*/function () {
     value: function handleError(error, handlers) {
       var _this5 = this;
 
+      this.resolveHandlers(error, handlers, 'afterCatch');
       return new Promise( /*#__PURE__*/function () {
         var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(resolve) {
           var onCatch, fetch;
@@ -509,18 +510,32 @@ var RequestManager = /*#__PURE__*/function () {
       return onResponse;
     }()
   }, {
-    key: "onCatch",
+    key: "onFinally",
     value: function () {
-      var _onCatch = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(error, handlers) {
+      var _onFinally = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(handlers) {
+        var request, resolved;
         return _regenerator["default"].wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
-                this.resolveHandlers(error, handlers, 'afterCatch');
-                _context9.next = 3;
-                return this.handleError(error, handlers);
+                request = this._request;
+                this.resolveHandlers(request.data, handlers, 'afterFinally');
+                _context9.next = 4;
+                return this.resolveRequest(['finally'], request.data, handlers);
 
-              case 3:
+              case 4:
+                resolved = _context9.sent;
+                _context9.t0 = resolved;
+
+                if (_context9.t0) {
+                  _context9.next = 9;
+                  break;
+                }
+
+                _context9.next = 9;
+                return this.setResult(this.resolveHandlers(request.data, handlers, 'onFinally'));
+
+              case 9:
               case "end":
                 return _context9.stop();
             }
@@ -528,47 +543,7 @@ var RequestManager = /*#__PURE__*/function () {
         }, _callee9, this);
       }));
 
-      function onCatch(_x9, _x10) {
-        return _onCatch.apply(this, arguments);
-      }
-
-      return onCatch;
-    }()
-  }, {
-    key: "onFinally",
-    value: function () {
-      var _onFinally = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(handlers) {
-        var request, resolved;
-        return _regenerator["default"].wrap(function _callee10$(_context10) {
-          while (1) {
-            switch (_context10.prev = _context10.next) {
-              case 0:
-                request = this._request;
-                this.resolveHandlers(request.data, handlers, 'afterFinally');
-                _context10.next = 4;
-                return this.resolveRequest(['finally'], request.data, handlers);
-
-              case 4:
-                resolved = _context10.sent;
-                _context10.t0 = resolved;
-
-                if (_context10.t0) {
-                  _context10.next = 9;
-                  break;
-                }
-
-                _context10.next = 9;
-                return this.setResult(this.resolveHandlers(request.data, handlers, 'onFinally'));
-
-              case 9:
-              case "end":
-                return _context10.stop();
-            }
-          }
-        }, _callee10, this);
-      }));
-
-      function onFinally(_x11) {
+      function onFinally(_x9) {
         return _onFinally.apply(this, arguments);
       }
 
@@ -577,46 +552,46 @@ var RequestManager = /*#__PURE__*/function () {
   }, {
     key: "setResult",
     value: function () {
-      var _setResult = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(result) {
-        return _regenerator["default"].wrap(function _callee11$(_context11) {
+      var _setResult = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(result) {
+        return _regenerator["default"].wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
-                _context11.t0 = result === undefined;
+                _context10.t0 = result === undefined;
 
-                if (_context11.t0) {
-                  _context11.next = 10;
+                if (_context10.t0) {
+                  _context10.next = 10;
                   break;
                 }
 
                 if (!(result instanceof Promise)) {
-                  _context11.next = 8;
+                  _context10.next = 8;
                   break;
                 }
 
-                _context11.next = 5;
+                _context10.next = 5;
                 return result;
 
               case 5:
-                _context11.t1 = _context11.sent;
-                _context11.next = 9;
+                _context10.t1 = _context10.sent;
+                _context10.next = 9;
                 break;
 
               case 8:
-                _context11.t1 = result;
+                _context10.t1 = result;
 
               case 9:
-                this._request.data.result = _context11.t1;
+                this._request.data.result = _context10.t1;
 
               case 10:
               case "end":
-                return _context11.stop();
+                return _context10.stop();
             }
           }
-        }, _callee11, this);
+        }, _callee10, this);
       }));
 
-      function setResult(_x12) {
+      function setResult(_x10) {
         return _setResult.apply(this, arguments);
       }
 
