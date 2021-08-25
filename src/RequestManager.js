@@ -176,12 +176,12 @@ class RequestManager {
         const isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess')
         const isError = this.resolveHandlers(_response, handlers, 'isError')
 
-        if (isSuccess === true && this._resolve.includes('success')) {
+        if (isSuccess === true && this._resolve.map(i => i.method).includes('success')) {
 
             const resolved = await this.resolveRequest(['success'], response, handlers)
             resolved || await this.setResult(this.resolveHandlers(response, handlers, 'onSuccess'))
 
-        } else if (isError === true && this._resolve.includes('error')) {
+        } else if (isError === true && this._resolve.map(i => i.method).includes('error')) {
 
             const resolved = await this.resolveRequest(['error'], response, handlers)
             resolved || await this.setResult(this.resolveHandlers(response, handlers, 'onError'))
