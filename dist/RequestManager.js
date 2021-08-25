@@ -450,7 +450,7 @@ var RequestManager = /*#__PURE__*/function () {
                 isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess');
                 isError = this.resolveHandlers(_response, handlers, 'isError');
 
-                if (!(isSuccess === true)) {
+                if (!(isSuccess === true && this._resolve.includes('success'))) {
                   _context8.next = 14;
                   break;
                 }
@@ -475,7 +475,7 @@ var RequestManager = /*#__PURE__*/function () {
                 break;
 
               case 14:
-                if (!(isError === true)) {
+                if (!(isError === true && this._resolve.includes('error'))) {
                   _context8.next = 24;
                   break;
                 }
