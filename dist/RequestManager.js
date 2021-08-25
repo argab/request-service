@@ -450,13 +450,13 @@ var RequestManager = /*#__PURE__*/function () {
                 isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess');
                 isError = this.resolveHandlers(_response, handlers, 'isError');
 
-                if (!(isSuccess === true || isSuccess !== true && isError !== true)) {
+                if (!(isSuccess === true)) {
                   _context8.next = 14;
                   break;
                 }
 
                 _context8.next = 7;
-                return this.resolveRequest(['success', 'then'], response, handlers);
+                return this.resolveRequest(['success'], response, handlers);
 
               case 7:
                 resolved = _context8.sent;
@@ -471,12 +471,12 @@ var RequestManager = /*#__PURE__*/function () {
                 return this.setResult(this.resolveHandlers(response, handlers, 'onSuccess'));
 
               case 12:
-                _context8.next = 22;
+                _context8.next = 27;
                 break;
 
               case 14:
                 if (!(isError === true)) {
-                  _context8.next = 22;
+                  _context8.next = 24;
                   break;
                 }
 
@@ -496,6 +496,19 @@ var RequestManager = /*#__PURE__*/function () {
                 return this.setResult(this.resolveHandlers(response, handlers, 'onError'));
 
               case 22:
+                _context8.next = 27;
+                break;
+
+              case 24:
+                if (!(isSuccess !== false)) {
+                  _context8.next = 27;
+                  break;
+                }
+
+                _context8.next = 27;
+                return this.resolveRequest(['then'], response, handlers);
+
+              case 27:
               case "end":
                 return _context8.stop();
             }
