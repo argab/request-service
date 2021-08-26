@@ -12,6 +12,7 @@ class RequestMiddleware {
 
     _repo = null
     _repoPath = null
+    _repoMethod = null
     _runRepo = false
 
     constructor(service, request = null) {
@@ -30,6 +31,7 @@ class RequestMiddleware {
             if (state._runRepo) {
                 state._runRepo = false
                 state._chain.push({method, args})
+                state._repoMethod = method
                 return state._repo[method](args[0], args[1], args[2], args[3])
             }
 
@@ -58,6 +60,7 @@ class RequestMiddleware {
                         params,
                         repo: null,
                         repoPath: null,
+                        repoMethod: null,
                         statusCode: 0,
                         dataError: null,
                         result: null,
@@ -74,6 +77,7 @@ class RequestMiddleware {
                 Object.assign(state._request.data, {
                     repo: state._repo,
                     repoPath: state._repoPath,
+                    repoMethod: state._repoMethod
                 })
 
                 const manager = new state._service._manager({

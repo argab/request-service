@@ -92,6 +92,7 @@ class RequestRetry {
         Object.assign(request.data, {
             repo: null,
             repoPath: null,
+            repoMethod: null,
             statusCode: 0,
             retry: request.data.retry,
             retryOnCatch: request.data.retryOnCatch,

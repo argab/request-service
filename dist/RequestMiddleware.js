@@ -33,6 +33,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_request", void 0);
     (0, _defineProperty2["default"])(this, "_repo", null);
     (0, _defineProperty2["default"])(this, "_repoPath", null);
+    (0, _defineProperty2["default"])(this, "_repoMethod", null);
     (0, _defineProperty2["default"])(this, "_runRepo", false);
     if (false === service instanceof _Request.RequestService) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".';
     if (request && false === request instanceof _Request.Request) throw 'The RequestMiddleware`s "request" is not an instance of "Request".';
@@ -51,6 +52,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
             args: args
           });
 
+          state._repoMethod = method;
           return state._repo[method](args[0], args[1], args[2], args[3]);
         }
 
@@ -84,6 +86,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
               params: params,
               repo: null,
               repoPath: null,
+              repoMethod: null,
               statusCode: 0,
               dataError: null,
               result: null
@@ -99,7 +102,8 @@ var RequestMiddleware = /*#__PURE__*/function () {
 
           Object.assign(state._request.data, {
             repo: state._repo,
-            repoPath: state._repoPath
+            repoPath: state._repoPath,
+            repoMethod: state._repoMethod
           });
           var manager = new state._service._manager({
             request: state._request,

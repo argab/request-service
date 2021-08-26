@@ -22,6 +22,7 @@ class AbstractRequest {
         client: null,
         repo: null,
         repoPath: null,
+        repoMethod: null,
         loader: null,
         useLoader: false,
         stubData: null,
