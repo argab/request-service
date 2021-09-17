@@ -30,8 +30,10 @@ class RequestManager {
     fetchData() {
 
         const data = this._request.data
+        const $this = this
+
         const handlers = this._factory.getHandlers(data, handler => {
-            handler.prototype.retry = (resolve) => this.retry(resolve)
+            handler.prototype.retry = (resolve) => $this.retry(resolve)
         })
 
         this.resolveHandlers(data, handlers, 'before')

@@ -51,10 +51,11 @@ var RequestManager = /*#__PURE__*/function () {
       var _this = this;
 
       var data = this._request.data;
+      var $this = this;
 
       var handlers = this._factory.getHandlers(data, function (handler) {
         handler.prototype.retry = function (resolve) {
-          return _this.retry(resolve);
+          return $this.retry(resolve);
         };
       });
 

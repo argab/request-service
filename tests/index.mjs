@@ -43,7 +43,11 @@ class Handler extends RequestHandler {
     }
 
     onCatch(error) {
-        console.error(`handler onCatch: `, error)
+        // console.error(`handler onCatch: `, error)
+
+        this.retry(() => new Promise((resolve, reject) => {
+            setTimeout(() => resolve(true), 5000)
+        }))
     }
 
     isSuccess(response) {
@@ -178,7 +182,7 @@ const app = new App();
 
 (async () => {
 
-    await app.request.get('/posts').error(r => {}).then(response => {
+    /*await app.request.get('/posts').error(r => {}).then(response => {
         console.log('simple posts: ',  JSON.stringify(response.data))
     }).catch(err => console.error(err))
 
@@ -238,21 +242,21 @@ const app = new App();
     log.forEach(r => chain.push(r.chain.map(i => i.method)))
     console.log(prettyFormat(chain))
 
-    result =
+    result =*/
         await app.request
         .repo('posts')
         .getPosts()
-        .success(() => {throw 'testing errors.'})
-        .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
-        .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
-        .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
-        .catch()
-        .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
-        .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
-        .finally((data) => data)
+        .then(() => {throw 'testing errors.'})
+        // .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
+        // .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
+        // .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
+        // .catch()
+        // .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
+        // .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
+        // .finally((data) => data)
 
-    console.error('RESULT: ', result)
+   /* console.error('RESULT: ', result)
 
-    console.log(log[log.length-1].data)
+    console.log(log[log.length-1].data)*/
 
 })();
