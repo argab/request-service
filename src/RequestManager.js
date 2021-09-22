@@ -11,12 +11,8 @@ class RequestManager {
     _retry
 
     constructor({request, service}) {
-
-        if (false === (request instanceof Request))
-            throw 'The RequestManager`s "request" is not an instance of "Request".'
-
-        if (false === (service instanceof RequestService))
-            throw 'The RequestManager`s "service" is not an instance of "RequestService".'
+        if (!(request instanceof Request)) throw 'The RequestManager`s "request" is not an instance of "Request".'
+        if (!(service instanceof RequestService)) throw 'The RequestManager`s "service" is not an instance of "RequestService".'
 
         this._request = request
         this._service = service
@@ -27,7 +23,7 @@ class RequestManager {
         this._request.data.log && this._service.log(this._request)
     }
 
-    fetchData() {
+    async fetchData() {
 
         const data = this._request.data
         const $this = this
@@ -36,7 +32,7 @@ class RequestManager {
             handler.prototype.retry = (resolve) => $this.retry(resolve)
         })
 
-        this.resolveHandlers(data, handlers, 'before')
+        await this.resolveHandlers(data, handlers, 'before')
 
         const client = this._factory.getClient(data)
         const loader = this._factory.getLoader(data)
@@ -49,9 +45,9 @@ class RequestManager {
         return {data, client, handlers, loader, dataClient, getLoader}
     }
 
-    send() {
+    async send() {
 
-        const {data, handlers, dataClient, getLoader} = this.fetchData()
+        const {data, handlers, dataClient, getLoader} = await this.fetchData()
         const promise = dataClient instanceof Promise ? dataClient : new Promise(res => setTimeout(() => res(dataClient), 100))
 
         getLoader()?.start()
@@ -100,15 +96,24 @@ class RequestManager {
         return request._fetch
     }
 
-    resolveHandlers(data, handlers, action) {
-        let result = undefined
-        handlers.forEach(handler => {
-            if (handler[action] instanceof Function) {
-                const _data = handler[action](data)
-                _data === undefined || (result = _data)
+    async resolveHandlers(data, handlers, action) {
+
+        return new Promise(async resolve => {
+
+            const source = [...handlers]
+
+            let result = undefined
+
+            const fetch = async () => {
+                if (source.length === 0) return resolve(result)
+                source[0][action] instanceof Function && (result = source[0][action](data))
+                result instanceof Promise && (result = await result)
+                source.shift()
+                await fetch()
             }
+
+            await fetch()
         })
-        return result
     }
 
     resolveRequest(methods, data, handlers) {
@@ -136,9 +141,9 @@ class RequestManager {
 
     handleError(error, handlers) {
 
-        this.resolveHandlers(error, handlers, 'afterCatch')
-
         return new Promise(async resolve => {
+
+            await this.resolveHandlers(error, handlers, 'afterCatch')
 
             const onCatch = this._resolve.filter(r => r.method === 'catch')
 
@@ -172,11 +177,11 @@ class RequestManager {
 
     async onResponse(response, handlers) {
 
-        this.resolveHandlers(response, handlers, 'after')
+        await this.resolveHandlers(response, handlers, 'after')
 
         const _response = {...response}
-        const isSuccess = this.resolveHandlers(_response, handlers, 'isSuccess')
-        const isError = this.resolveHandlers(_response, handlers, 'isError')
+        const isSuccess = await this.resolveHandlers(_response, handlers, 'isSuccess')
+        const isError = await this.resolveHandlers(_response, handlers, 'isError')
 
         if (isSuccess === true && this._resolve.map(i => i.method).includes('success')) {
 
@@ -196,7 +201,7 @@ class RequestManager {
 
     async onFinally(handlers) {
         const request = this._request
-        this.resolveHandlers(request.data, handlers, 'afterFinally')
+        await this.resolveHandlers(request.data, handlers, 'afterFinally')
         const resolved = await this.resolveRequest(['finally'], request.data, handlers)
         resolved || await this.setResult(this.resolveHandlers(request.data, handlers, 'onFinally'))
     }

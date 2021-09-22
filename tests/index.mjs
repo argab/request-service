@@ -37,6 +37,15 @@ class Handler extends RequestHandler {
 
     _data
 
+    before() {
+        return new Promise(res => {
+            setTimeout(() => {
+                console.log(111)
+                res()
+            }, 5000)
+        })
+    }
+
     constructor(data) {
         super()
         this._data = data
@@ -45,9 +54,9 @@ class Handler extends RequestHandler {
     onCatch(error) {
         // console.error(`handler onCatch: `, error)
 
-        this.retry(() => new Promise((resolve, reject) => {
-            setTimeout(() => resolve(true), 5000)
-        }))
+        // this.retry(() => new Promise((resolve, reject) => {
+        //     setTimeout(() => resolve(true), 5000)
+        // }))
     }
 
     isSuccess(response) {
