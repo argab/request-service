@@ -32,8 +32,8 @@ var RequestRetry = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "request", void 0);
     (0, _defineProperty2["default"])(this, "service", void 0);
     (0, _defineProperty2["default"])(this, "resolve", void 0);
-    if (false === request instanceof _Request.Request) throw 'The RequestRetry`s "request" is not an instance of "Request".';
-    if (false === service instanceof _Request.RequestService) throw 'The RequestRetry`s "service" is not an instance of "RequestService".';
+    if (!(request instanceof _Request.Request)) throw 'The RequestRetry`s "request" is not an instance of "Request".';
+    if (!(service instanceof _Request.RequestService)) throw 'The RequestRetry`s "service" is not an instance of "RequestService".';
     this.request = request;
     this.service = service;
     this.resolve = resolve;

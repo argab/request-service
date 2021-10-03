@@ -35,8 +35,8 @@ var RequestMiddleware = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_repoPath", null);
     (0, _defineProperty2["default"])(this, "_repoMethod", null);
     (0, _defineProperty2["default"])(this, "_runRepo", false);
-    if (false === service instanceof _Request.RequestService) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".';
-    if (request && false === request instanceof _Request.Request) throw 'The RequestMiddleware`s "request" is not an instance of "Request".';
+    if (!(service instanceof _Request.RequestService)) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".';
+    if (request && !(request instanceof _Request.Request)) throw 'The RequestMiddleware`s "request" is not an instance of "Request".';
     this._service = service;
     this._request = request;
 

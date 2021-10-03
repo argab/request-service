@@ -644,7 +644,7 @@ var RequestManager = /*#__PURE__*/function () {
                 break;
 
               case 29:
-                if (!(isSuccess !== false)) {
+                if (!((isSuccess === true || isSuccess === undefined) && (isError === undefined || isError === false))) {
                   _context13.next = 32;
                   break;
                 }
