@@ -9,10 +9,8 @@ class RequestRetry {
 
     constructor({request, service, resolve}) {
 
-        if (false === (request instanceof Request))
-            throw 'The RequestRetry`s "request" is not an instance of "Request".'
-        if (false === (service instanceof RequestService))
-            throw 'The RequestRetry`s "service" is not an instance of "RequestService".'
+        if (!(request instanceof Request)) throw 'The RequestRetry`s "request" is not an instance of "Request".'
+        if (!(service instanceof RequestService)) throw 'The RequestRetry`s "service" is not an instance of "RequestService".'
 
         this.request = request
         this.service = service

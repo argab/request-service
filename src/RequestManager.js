@@ -193,7 +193,7 @@ class RequestManager {
             const resolved = await this.resolveRequest(['error'], response, handlers)
             resolved || await this.setResult(this.resolveHandlers(response, handlers, 'onError'))
 
-        } else if (isSuccess !== false) {
+        } else if ((isSuccess === true || isSuccess === undefined) && (isError === undefined || isError === false)) {
 
             await this.resolveRequest(['then'], response, handlers)
         }

@@ -17,11 +17,8 @@ class RequestMiddleware {
 
     constructor(service, request = null) {
 
-        if (false === (service instanceof RequestService))
-            throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".'
-
-        if (request && false === (request instanceof Request))
-            throw 'The RequestMiddleware`s "request" is not an instance of "Request".'
+        if (!(service instanceof RequestService)) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".'
+        if (request && !(request instanceof Request)) throw 'The RequestMiddleware`s "request" is not an instance of "Request".'
 
         this._service = service
         this._request = request
