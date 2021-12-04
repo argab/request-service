@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isPrototype = exports.proxy = exports.mergeDeep = void 0;
+exports.applyCall = exports.isPrototype = exports.proxy = exports.mergeDeep = void 0;
 
 var mergeDeep = function mergeDeep(target, source) {
   var isObject = function isObject(obj) {
@@ -53,3 +53,10 @@ var isPrototype = function isPrototype(state, target) {
 };
 
 exports.isPrototype = isPrototype;
+
+var applyCall = function applyCall(state, method, arrayArgs) {
+  Array.isArray(arrayArgs) || (arrayArgs = [arrayArgs]);
+  return state[method].apply(state, arrayArgs);
+};
+
+exports.applyCall = applyCall;

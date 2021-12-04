@@ -1,4 +1,4 @@
-import {mergeDeep, proxy} from "./helpers"
+import {mergeDeep, proxy, applyCall} from "./helpers"
 import {Request, RequestService} from "./Request"
 import {RequestRepository} from "./Interfaces"
 
@@ -29,12 +29,12 @@ class RequestMiddleware {
                 state._runRepo = false
                 state._chain.push({method, args})
                 state._repoMethod = method
-                return state._repo[method](args[0], args[1], args[2], args[3])
+                return applyCall(state._repo, method, args)
             }
 
             if (['repo', 'stub'].includes(method)) {
                 state._chain.push({method, args})
-                state._repo = state._service[method](args[0], args[1], args[2], args[3])
+                state._repo = applyCall(state._service, method, args)
                 state._repo instanceof RequestRepository && (state._repo.client = _proxy(state))
                 state._repoPath = args[0]
                 state._runRepo = true
@@ -93,7 +93,7 @@ class RequestMiddleware {
 
             if (state[method] instanceof Function) {
                 state._chain.push({method, args})
-                state[method](args[0], args[1], args[2], args[3])
+                applyCall(state, method, args)
                 return _proxy(state)
             }
         })

@@ -36,3 +36,8 @@ export const proxy = function (state, publicProps, handler) {
 export const isPrototype = function (state, target) {
     return state?.isPrototypeOf(target) || (state?.prototype && state.prototype === target?.prototype)
 }
+
+export const applyCall = function (state, method, arrayArgs) {
+    Array.isArray(arrayArgs) || (arrayArgs = [arrayArgs])
+    return state[method].apply(state, arrayArgs)
+}

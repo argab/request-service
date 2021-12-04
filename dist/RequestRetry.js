@@ -106,12 +106,12 @@ var RequestRetry = /*#__PURE__*/function () {
       var chain = request.chain;
       var middleware = new this.service._middleware(this.service, request);
       request.chain = [];
-      var pipe = middleware[chain[0].method](chain[0].args[0], chain[0].args[1], chain[0].args[2], chain[0].args[3]);
+      var pipe = (0, _helpers.applyCall)(middleware, chain[0].method, chain[0].args);
       chain.shift();
       chain.forEach(function (_ref2) {
         var method = _ref2.method,
             args = _ref2.args;
-        pipe[method] instanceof Function && (pipe = pipe[method](args[0], args[1], args[2], args[3]));
+        pipe[method] instanceof Function && (pipe = (0, _helpers.applyCall)(pipe, method, args));
       });
     }
   }, {

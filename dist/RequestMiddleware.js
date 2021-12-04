@@ -53,7 +53,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
           });
 
           state._repoMethod = method;
-          return state._repo[method](args[0], args[1], args[2], args[3]);
+          return (0, _helpers.applyCall)(state._repo, method, args);
         }
 
         if (['repo', 'stub'].includes(method)) {
@@ -62,7 +62,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
             args: args
           });
 
-          state._repo = state._service[method](args[0], args[1], args[2], args[3]);
+          state._repo = (0, _helpers.applyCall)(state._service, method, args);
           state._repo instanceof _Interfaces.RequestRepository && (state._repo.client = _proxy(state));
           state._repoPath = args[0];
           state._runRepo = true;
@@ -127,7 +127,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
             args: args
           });
 
-          state[method](args[0], args[1], args[2], args[3]);
+          (0, _helpers.applyCall)(state, method, args);
           return _proxy(state);
         }
       });

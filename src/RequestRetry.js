@@ -1,5 +1,5 @@
 import {Request, RequestService} from "./Request"
-import {proxy} from "./helpers"
+import {applyCall, proxy} from "./helpers"
 
 class RequestRetry {
 
@@ -51,11 +51,11 @@ class RequestRetry {
 
         request.chain = []
 
-        let pipe = middleware[chain[0].method](chain[0].args[0], chain[0].args[1], chain[0].args[2], chain[0].args[3])
+        let pipe = applyCall(middleware, chain[0].method, chain[0].args)
 
         chain.shift()
         chain.forEach(({method, args}) => {
-            pipe[method] instanceof Function && (pipe = pipe[method](args[0], args[1], args[2], args[3]))
+            pipe[method] instanceof Function && (pipe = applyCall(pipe, method, args))
         })
     }
 

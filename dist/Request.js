@@ -153,7 +153,7 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         return state[method](args[0]);
       }
 
-      return new state._middleware(state)[method](args[0], args[1], args[2], args[3]);
+      return (0, _helpers.applyCall)(new state._middleware(state), method, args);
     }));
   }
 

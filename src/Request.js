@@ -3,7 +3,7 @@ import {RequestMiddleware} from "./RequestMiddleware"
 import {RequestMiddlewareDecorator} from "./Decorators"
 import {RequestManager} from "./RequestManager"
 import {RequestRetry} from "./RequestRetry"
-import {proxy, isPrototype} from "./helpers"
+import {proxy, isPrototype, applyCall} from "./helpers"
 
 class AbstractRequest {
 
@@ -90,7 +90,7 @@ class RequestService extends AbstractRequest {
             if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
                 return state[method](args[0])
             }
-            return new state._middleware(state)[method](args[0], args[1], args[2], args[3])
+            return applyCall(new state._middleware(state), method, args)
         })
     }
 

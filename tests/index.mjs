@@ -40,7 +40,7 @@ class Handler extends RequestHandler {
     before() {
         return new Promise(res => {
             setTimeout(() => {
-                console.log(111)
+                console.log('before request resolved.')
                 res()
             }, 5000)
         })
@@ -122,8 +122,8 @@ class App {
         }).catch(err => console.error(err))
     }
 
-    getPostsRepo() {
-        return this.request.repo('posts').getPosts().then(response => {
+    getPostsRepo(arg1, arg2, arg3, arg4, arg5) {
+        return this.request.repo('posts').getPosts(arg1, arg2, arg3, arg4, arg5).then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
             throw 'Checking ApiHandler.'
         })
@@ -191,13 +191,13 @@ const app = new App();
 
 (async () => {
 
-    /*await app.request.get('/posts').error(r => {}).then(response => {
+    await app.request.get('/posts').error(r => {}).then(response => {
         console.log('simple posts: ',  JSON.stringify(response.data))
     }).catch(err => console.error(err))
 
     await app.getPosts()
 
-    await app.getPostsRepo()
+    await app.getPostsRepo(1, 2, 3, 4, 5)
 
     await app.getCommentsStub()
 
@@ -227,7 +227,7 @@ const app = new App();
         })
 
     console.error(result)
-    //
+    // //
     const log = app.request.getLog()
     console.log('requests logged number: ', log.length)
 
@@ -251,21 +251,21 @@ const app = new App();
     log.forEach(r => chain.push(r.chain.map(i => i.method)))
     console.log(prettyFormat(chain))
 
-    result =*/
+    result =
         await app.request
         .repo('posts')
         .getPosts()
         .then(() => {throw 'testing errors.'})
-        // .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
-        // .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
-        // .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
-        // .catch()
-        // .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
-        // .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
-        // .finally((data) => data)
+        .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
+        .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
+        .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
+        .catch()
+        .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
+        .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
+        .finally((data) => data)
 
-   /* console.error('RESULT: ', result)
+    console.error('RESULT: ', result)
 
-    console.log(log[log.length-1].data)*/
+    console.log(log[log.length-1].data)
 
 })();
