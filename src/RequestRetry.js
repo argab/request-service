@@ -67,7 +67,7 @@ class RequestRetry {
         })
 
         if (request.data.retryChain instanceof Function) {
-            const chain = [...request.chain]
+            const chain = request.chain.slice()
             request.chain = []
             const _chain = request.data.retryChain({set, chain, data: request.data})
             Array.isArray(_chain) && (request.chain = _chain)

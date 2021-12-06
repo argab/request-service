@@ -52,27 +52,33 @@ class RequestManager {
 
         getLoader()?.start()
 
-        promise.then(async response => {
+        promise.then(response => {
 
-            await this.setResult(response)
-            await this.onResponse(response, handlers)
-            data.statusCode || this.setStatusCode(response, 200)
+            (async () => {
+                await this.setResult(response)
+                await this.onResponse(response, handlers)
+                data.statusCode || this.setStatusCode(response, 200)
+            })()
 
-        }).catch(async error => {
+        }).catch(error => {
 
-            this.setError(error)
-            await this.handleError(error, handlers)
-            data.statusCode || this.setStatusCode(error, 500)
+            (async () => {
+                this.setError(error)
+                await this.handleError(error, handlers)
+                data.statusCode || this.setStatusCode(error?.response || error, 500)
+            })()
 
-        }).finally(async () => {
+        }).finally(() => {
 
-            getLoader()?.end()
+            (async () => {
+                getLoader()?.end()
 
-            await this.onFinally(handlers)
-            data.statusCode || this.setStatusCode(null, 200)
+                await this.onFinally(handlers)
+                data.statusCode || this.setStatusCode(null, 200)
 
-            const retry = this._retry instanceof Function ? this._retry() : this.retry()
-            retry === false && this._request._resolve()
+                const retry = this._retry instanceof Function ? this._retry() : this.retry()
+                retry === false && this._request._resolve()
+            })()
         })
     }
 
@@ -100,76 +106,88 @@ class RequestManager {
 
     async resolveHandlers(data, handlers, action) {
 
-        return new Promise(async resolve => {
+        return new Promise(resolve => {
 
-            const source = [...handlers]
+            (async () => {
 
-            let result = undefined
+                const source = [...handlers]
 
-            const fetch = async () => {
-                if (source.length === 0) return resolve(result)
-                source[0][action] instanceof Function && (result = source[0][action](data))
-                result instanceof Promise && (result = await result)
-                source.shift()
+                let result = undefined
+
+                const fetch = async () => {
+                    if (source.length === 0) return resolve(result)
+                    source[0][action] instanceof Function && (result = source[0][action](data))
+                    result instanceof Promise && (result = await result)
+                    source.shift()
+                    await fetch()
+                }
+
                 await fetch()
-            }
 
-            await fetch()
+            })()
         })
     }
 
     resolveRequest(methods, data, handlers) {
 
-        return new Promise(async resolve => {
+        return new Promise(resolve => {
 
-            const source = this._resolve.filter(r => methods.includes(r.method))
+            (async () => {
 
-            if (source.length === 0) return resolve(false)
+                const source = this._resolve.filter(r => methods.includes(r.method))
 
-            const fetch = async (data) => {
-                if (source.length === 0) return resolve(true)
-                try {
-                    source[0].arg instanceof Function && await this.setResult(source[0].arg(data))
-                } catch (err) {
-                    await this.handleError(err, handlers)
+                if (source.length === 0) return resolve(false)
+
+                const fetch = async (data) => {
+                    if (source.length === 0) return resolve(true)
+                    try {
+                        source[0].arg instanceof Function && await this.setResult(source[0].arg(data))
+                    } catch (err) {
+                        await this.handleError(err, handlers)
+                    }
+                    source.shift()
+                    await fetch(this._request.data.result)
                 }
-                source.shift()
-                await fetch(this._request.data.result)
-            }
 
-            await fetch(data)
+                await fetch(data)
+
+            })()
         })
     }
 
     handleError(error, handlers) {
 
-        return new Promise(async resolve => {
+        return new Promise(resolve => {
 
-            await this.resolveHandlers(error, handlers, 'afterCatch')
+            (async () => {
 
-            const onCatch = this._resolve.filter(r => r.method === 'catch')
+                await this.resolveHandlers(error, handlers, 'afterCatch')
 
-            if (onCatch.length === 0) {
-                this.setError(error)
-                await this.setResult(this.resolveHandlers(error, handlers, 'onCatch'))
-                return resolve()
-            }
+                const onCatch = this._resolve.filter(r => r.method === 'catch')
 
-            const fetch = async (error) => {
-                if (onCatch.length === 0) return resolve()
-                try {
+                if (onCatch.length === 0) {
                     this.setError(error)
-                    onCatch[0].arg instanceof Function && await this.setResult(onCatch[0].arg(error))
-                } catch (err) {
-                    this.setError(err)
-                    await this.setResult(this.resolveHandlers(err, handlers, 'onCatch'))
-                    error = err
+                    await this.setResult(this.resolveHandlers(error, handlers, 'onCatch'))
+                    return resolve()
                 }
-                onCatch.shift()
-                await fetch(error)
-            }
 
-            await fetch(error)
+                const fetch = async (error) => {
+                    if (onCatch.length === 0) return resolve()
+                    try {
+                        this.setError(error)
+                        onCatch[0].arg instanceof Function && await this.setResult(onCatch[0].arg(error))
+                    } catch (err) {
+                        this.setError(err)
+                        await this.setResult(this.resolveHandlers(err, handlers, 'onCatch'))
+                        error = err
+                    }
+                    onCatch.shift()
+                    await fetch(error)
+                }
+
+                await fetch(error)
+
+            })()
         })
     }
 

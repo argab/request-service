@@ -9,8 +9,6 @@ exports.RequestRetry = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
-
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
@@ -127,7 +125,7 @@ var RequestRetry = /*#__PURE__*/function () {
       });
 
       if (request.data.retryChain instanceof Function) {
-        var chain = (0, _toConsumableArray2["default"])(request.chain);
+        var chain = request.chain.slice();
         request.chain = [];
 
         var _chain = request.data.retryChain({

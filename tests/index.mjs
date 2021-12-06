@@ -52,11 +52,11 @@ class Handler extends RequestHandler {
     }
 
     onCatch(error) {
-        // console.error(`handler onCatch: `, error)
+        console.error(`handler onCatch: `, error)
 
-        // this.retry(() => new Promise((resolve, reject) => {
-        //     setTimeout(() => resolve(true), 5000)
-        // }))
+        this.retry(() => new Promise((resolve, reject) => {
+            setTimeout(() => resolve(true), 5000)
+        }))
     }
 
     isSuccess(response) {
@@ -214,7 +214,7 @@ const app = new App();
         .retryTimeout(3000)
         .retry(true)
         .retryChain(({chain}) => {
-            chain.push({method: 'success', args: [() => {console.error('Good!')}]})
+            chain.push({method: 'catch', args: [() => {console.error('RETRY: ', 'added "CATCH" into chain.')}]})
             return chain
         })
         .retryOnCatch(data => {
@@ -226,7 +226,7 @@ const app = new App();
             })
         })
 
-    console.error(result)
+    console.error('RESULTS: ', result)
     // //
     const log = app.request.getLog()
     console.log('requests logged number: ', log.length)
