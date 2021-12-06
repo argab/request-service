@@ -1,6 +1,6 @@
 import {RequestClient, RequestHandler, RequestLoader} from "./Interfaces"
 import {AbstractRequest, Request} from "./Request"
-import {isPrototype} from "./helpers"
+import {isPrototype, mergeDeep} from "./helpers"
 
 class RequestFactory {
 
@@ -23,12 +23,46 @@ class RequestFactory {
         if (this._service) {
             const extend = this._service.extends().request
             extend instanceof Object && Object.keys(extend).forEach(key => {
-                request._methods.push(key)
+                request.methods = key
                 request[key] = extend[key]
             })
         }
 
         return request
+    }
+
+    createOrAssign(request, data, config) {
+
+        data ||= {}
+        config ||= {}
+
+        if (request && request instanceof Request) {
+
+            request.chain = []
+
+            request.data = mergeDeep(request.data, data)
+
+            Object.assign(request.data, {
+                method: data.method,
+                uri: data.uri,
+                params: data.params,
+                repo: null,
+                repoPath: null,
+                repoMethod: null,
+                statusCode: 0,
+                dataError: null,
+                result: null,
+            })
+
+            return request
+        }
+
+        return this.create({
+            method: data.method,
+            uri: data.uri,
+            params: data.params,
+            config
+        })
     }
 
     getClient(data) {
@@ -45,7 +79,9 @@ class RequestFactory {
         const output = []
 
         let handlers = data.handler || this._handler
+
         Array.isArray(handlers) || (handlers = [handlers])
+
         handlers.forEach(handler => {
             if (isPrototype(RequestHandler, handler)) {
                 appendDataFunc instanceof Function && appendDataFunc(handler)

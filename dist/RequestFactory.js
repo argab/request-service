@@ -57,13 +57,42 @@ var RequestFactory = /*#__PURE__*/function () {
         var extend = this._service["extends"]().request;
 
         extend instanceof Object && Object.keys(extend).forEach(function (key) {
-          request._methods.push(key);
-
+          request.methods = key;
           request[key] = extend[key];
         });
       }
 
       return request;
+    }
+  }, {
+    key: "createOrAssign",
+    value: function createOrAssign(request, data, config) {
+      data || (data = {});
+      config || (config = {});
+
+      if (request && request instanceof _Request.Request) {
+        request.chain = [];
+        request.data = (0, _helpers.mergeDeep)(request.data, data);
+        Object.assign(request.data, {
+          method: data.method,
+          uri: data.uri,
+          params: data.params,
+          repo: null,
+          repoPath: null,
+          repoMethod: null,
+          statusCode: 0,
+          dataError: null,
+          result: null
+        });
+        return request;
+      }
+
+      return this.create({
+        method: data.method,
+        uri: data.uri,
+        params: data.params,
+        config: config
+      });
     }
   }, {
     key: "getClient",

@@ -13,6 +13,8 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
+
 var _helpers = require("./helpers");
 
 var _Request = require("./Request");
@@ -23,117 +25,53 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
+var _repo = /*#__PURE__*/new WeakMap();
+
+var _chain = /*#__PURE__*/new WeakMap();
+
+var _proxy = /*#__PURE__*/new WeakSet();
+
+var _runRepo = /*#__PURE__*/new WeakSet();
+
+var _runManager = /*#__PURE__*/new WeakSet();
+
 var RequestMiddleware = /*#__PURE__*/function () {
   function RequestMiddleware(service) {
     var request = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     (0, _classCallCheck2["default"])(this, RequestMiddleware);
+
+    _runManager.add(this);
+
+    _runRepo.add(this);
+
+    _proxy.add(this);
+
     (0, _defineProperty2["default"])(this, "_staged", {});
-    (0, _defineProperty2["default"])(this, "_chain", []);
     (0, _defineProperty2["default"])(this, "_service", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
-    (0, _defineProperty2["default"])(this, "_repo", null);
-    (0, _defineProperty2["default"])(this, "_repoPath", null);
-    (0, _defineProperty2["default"])(this, "_repoMethod", null);
-    (0, _defineProperty2["default"])(this, "_runRepo", false);
+
+    _repo.set(this, {
+      writable: true,
+      value: {
+        instance: null,
+        path: null,
+        method: null,
+        run: false
+      }
+    });
+
+    _chain.set(this, {
+      writable: true,
+      value: []
+    });
+
     if (!(service instanceof _Request.RequestService)) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".';
     if (request && !(request instanceof _Request.Request)) throw 'The RequestMiddleware`s "request" is not an instance of "Request".';
     this._service = service;
     this._request = request;
-
-    var _proxy = function _proxy(state) {
-      return (0, _helpers.proxy)(state, null, function (state, method, args) {
-        var _state$_request;
-
-        if (state._runRepo) {
-          state._runRepo = false;
-
-          state._chain.push({
-            method: method,
-            args: args
-          });
-
-          state._repoMethod = method;
-          return (0, _helpers.applyCall)(state._repo, method, args);
-        }
-
-        if (['repo', 'stub'].includes(method)) {
-          state._chain.push({
-            method: method,
-            args: args
-          });
-
-          state._repo = (0, _helpers.applyCall)(state._service, method, args);
-          state._repo instanceof _Interfaces.RequestRepository && (state._repo.client = _proxy(state));
-          state._repoPath = args[0];
-          state._runRepo = true;
-          return _proxy(state);
-        }
-
-        var client = state._staged.client || ((_state$_request = state._request) === null || _state$_request === void 0 ? void 0 : _state$_request.data.client) || state._service._config.client;
-
-        if (state._service._factory.getClientPrototype({
-          client: client
-        }).prototype[method] instanceof Function) {
-          var uri = args[0];
-          var params = args[1];
-
-          if (state._request) {
-            state._request.chain = [];
-            state._request.data = (0, _helpers.mergeDeep)(state._request.data, state._staged);
-            Object.assign(state._request.data, {
-              method: method,
-              uri: uri,
-              params: params,
-              repo: null,
-              repoPath: null,
-              repoMethod: null,
-              statusCode: 0,
-              dataError: null,
-              result: null
-            });
-          } else {
-            state._request = state._service._factory.create({
-              method: method,
-              uri: uri,
-              params: params,
-              config: (0, _helpers.mergeDeep)(_objectSpread({}, state._service._config), state._staged)
-            });
-          }
-
-          Object.assign(state._request.data, {
-            repo: state._repo,
-            repoPath: state._repoPath,
-            repoMethod: state._repoMethod
-          });
-          var manager = new state._service._manager({
-            request: state._request,
-            service: state._service
-          });
-
-          state._chain.push({
-            method: method,
-            args: args
-          });
-
-          state._request.chain = state._chain;
-          state._request._fetch || manager.save();
-          manager.send();
-          return manager.fetch();
-        }
-
-        if (state[method] instanceof Function) {
-          state._chain.push({
-            method: method,
-            args: args
-          });
-
-          (0, _helpers.applyCall)(state, method, args);
-          return _proxy(state);
-        }
-      });
-    };
-
-    return _proxy(this);
+    return _classPrivateMethodGet(this, _proxy, _proxy2).call(this);
   }
 
   (0, _createClass2["default"])(RequestMiddleware, [{
@@ -146,3 +84,80 @@ var RequestMiddleware = /*#__PURE__*/function () {
 }();
 
 exports.RequestMiddleware = RequestMiddleware;
+
+function _proxy2() {
+  var _this = this;
+
+  return (0, _helpers.proxy)(this, null, function (state, method, args) {
+    var _state$_request;
+
+    var runRepo = _classPrivateMethodGet(state, _runRepo, _runRepo2).call(state, method, args);
+
+    if (runRepo) return runRepo;
+    var client = state._staged.client || ((_state$_request = state._request) === null || _state$_request === void 0 ? void 0 : _state$_request.data.client) || state._service._config.client;
+
+    if (state._service._factory.getClientPrototype({
+      client: client
+    }).prototype[method] instanceof Function) {
+      return _classPrivateMethodGet(_this, _runManager, _runManager2).call(_this, method, args);
+    }
+
+    if (state[method] instanceof Function) {
+      (0, _classPrivateFieldGet2["default"])(state, _chain).push({
+        method: method,
+        args: args
+      });
+      (0, _helpers.applyCall)(state, method, args);
+      return _classPrivateMethodGet(state, _proxy, _proxy2).call(state);
+    }
+  });
+}
+
+function _runRepo2(method, args) {
+  if ((0, _classPrivateFieldGet2["default"])(this, _repo).run) {
+    (0, _classPrivateFieldGet2["default"])(this, _repo).run = false;
+    (0, _classPrivateFieldGet2["default"])(this, _repo).method = method;
+    (0, _classPrivateFieldGet2["default"])(this, _chain).push({
+      method: method,
+      args: args
+    });
+    return (0, _helpers.applyCall)((0, _classPrivateFieldGet2["default"])(this, _repo).instance, method, args);
+  }
+
+  if (['repo', 'stub'].includes(method)) {
+    (0, _classPrivateFieldGet2["default"])(this, _chain).push({
+      method: method,
+      args: args
+    });
+    (0, _classPrivateFieldGet2["default"])(this, _repo).instance = (0, _helpers.applyCall)(this._service, method, args);
+    (0, _classPrivateFieldGet2["default"])(this, _repo).instance instanceof _Interfaces.RequestRepository && ((0, _classPrivateFieldGet2["default"])(this, _repo).instance.client = _classPrivateMethodGet(this, _proxy, _proxy2).call(this));
+    (0, _classPrivateFieldGet2["default"])(this, _repo).path = args[0];
+    (0, _classPrivateFieldGet2["default"])(this, _repo).run = true;
+    return _classPrivateMethodGet(this, _proxy, _proxy2).call(this);
+  }
+}
+
+function _runManager2(method, args) {
+  this._request = this._service._factory.createOrAssign(this._request, _objectSpread(_objectSpread({}, this._staged), {}, {
+    uri: args[0],
+    params: args[1],
+    method: method
+  }), (0, _helpers.mergeDeep)(_objectSpread({}, this._service._config), this._staged));
+  Object.assign(this._request.data, {
+    repo: (0, _classPrivateFieldGet2["default"])(this, _repo).instance,
+    repoPath: (0, _classPrivateFieldGet2["default"])(this, _repo).path,
+    repoMethod: (0, _classPrivateFieldGet2["default"])(this, _repo).method
+  });
+  var manager = new this._service._manager({
+    request: this._request,
+    service: this._service
+  });
+  (0, _classPrivateFieldGet2["default"])(this, _chain).push({
+    method: method,
+    args: args
+  });
+  this._request.chain = (0, _classPrivateFieldGet2["default"])(this, _chain);
+  this._request._fetch || manager.save();
+  manager.send();
+  return manager.fetch();
+}

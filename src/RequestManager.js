@@ -1,5 +1,4 @@
 import {RequestService, Request} from "./Request"
-import {REQUEST_RESOLVE_METHODS} from "./Request"
 
 class RequestManager {
 
@@ -11,6 +10,7 @@ class RequestManager {
     _retry
 
     constructor({request, service}) {
+
         if (!(request instanceof Request)) throw 'The RequestManager`s "request" is not an instance of "Request".'
         if (!(service instanceof RequestService)) throw 'The RequestManager`s "service" is not an instance of "RequestService".'
 
@@ -77,17 +77,19 @@ class RequestManager {
     }
 
     fetch() {
+
         const request = this._request
+
         if (request._fetch instanceof Promise) return request._fetch
 
         request._fetch = new Promise(resolve => request._resolve = () => resolve(request.data.result))
-        request._methods.forEach(method => request[method] instanceof Function && (request._fetch[method] = (arg) => {
 
-            if (REQUEST_RESOLVE_METHODS.includes(method)) {
-                arg instanceof Function || (arg = () => undefined)
-            } else request[method](arg)
+        request.methods.forEach(method => request[method] instanceof Function && (request._fetch[method] = (arg) => {
+
+            request.resolveMethods.includes(method) ? (arg instanceof Function || (arg = () => {})) : request[method](arg)
 
             this._resolve.push({method, arg})
+
             request.chain.push({method, args: [arg]})
 
             return request._fetch

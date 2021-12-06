@@ -67,7 +67,9 @@ class AbstractRequest {
 class RequestService extends AbstractRequest {
 
     constructor({config, getRepo, getStub, useStubs, extend, factory, manager, middleware, request, requestRetry}) {
+
         super()
+
         this._getRepo = getRepo instanceof Function ? getRepo : () => null
         this._getStub = getStub instanceof Function ? getStub : () => null
         this._useStubs = Boolean(useStubs)
@@ -75,23 +77,15 @@ class RequestService extends AbstractRequest {
         this._manager = isPrototype(RequestManager, manager) ? manager : RequestManager
         this._middleware = isPrototype(RequestMiddleware, middleware) ? middleware : RequestMiddlewareDecorator
         this._retry = isPrototype(RequestRetry, requestRetry) ? requestRetry : RequestRetry
+        this._factory = new this._factory({request, service: this})
 
         config instanceof Object && Object.assign(this._config, config)
         extend instanceof Object && Object.assign(this._extend, extend)
 
-        this._factory = new this._factory({request, service: this})
-
         const _extend = this.extends().middleware
-        _extend instanceof Object && Object.keys(_extend).forEach(key => {
-            this._middleware.prototype[key] = _extend[key]
-        })
+        _extend instanceof Object && Object.keys(_extend).forEach(key => this._middleware.prototype[key] = _extend[key])
 
-        return proxy(this, null, (state, method, args) => {
-            if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
-                return state[method](args[0])
-            }
-            return applyCall(new state._middleware(state), method, args)
-        })
+        return this.#proxy()
     }
 
     repo(path) {
@@ -117,18 +111,39 @@ class RequestService extends AbstractRequest {
     extends() {
         return {...this._extend}
     }
-}
 
-export const REQUEST_RESOLVE_METHODS = ['then', 'catch', 'finally', 'success', 'error']
+    #proxy() {
+        return proxy(this, null, (state, method, args) => {
+            if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
+                return state[method](args[0])
+            }
+            return applyCall(new state._middleware(state), method, args)
+        })
+    }
+}
 
 class Request {
 
     data = {}
     chain = []
 
-    _methods = ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
     _fetch
     _resolve
+
+    #methods = ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
+    #resolveMethods = ['then', 'catch', 'finally', 'success', 'error']
+
+    get methods() {
+        return this.#methods.slice()
+    }
+
+    set methods(name) {
+        return this.#methods.push(name)
+    }
+
+    get resolveMethods() {
+        return this.#resolveMethods.slice()
+    }
 
     constructor(data) {
         this.data = data

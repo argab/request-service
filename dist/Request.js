@@ -5,7 +5,9 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AbstractRequest = exports.Request = exports.RequestService = exports.REQUEST_RESOLVE_METHODS = void 0;
+exports.AbstractRequest = exports.Request = exports.RequestService = void 0;
+
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
@@ -40,6 +42,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
 var AbstractRequest = /*#__PURE__*/function () {
   function AbstractRequest() {
@@ -105,6 +109,8 @@ var AbstractRequest = /*#__PURE__*/function () {
 
 exports.AbstractRequest = AbstractRequest;
 
+var _proxy = /*#__PURE__*/new WeakSet();
+
 var RequestService = /*#__PURE__*/function (_AbstractRequest) {
   (0, _inherits2["default"])(RequestService, _AbstractRequest);
 
@@ -125,6 +131,9 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         requestRetry = _ref.requestRetry;
     (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
+
+    _proxy.add((0, _assertThisInitialized2["default"])(_this));
+
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
       return null;
     };
@@ -136,25 +145,19 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     _this._manager = (0, _helpers.isPrototype)(_RequestManager.RequestManager, manager) ? manager : _RequestManager.RequestManager;
     _this._middleware = (0, _helpers.isPrototype)(_RequestMiddleware.RequestMiddleware, middleware) ? middleware : _Decorators.RequestMiddlewareDecorator;
     _this._retry = (0, _helpers.isPrototype)(_RequestRetry.RequestRetry, requestRetry) ? requestRetry : _RequestRetry.RequestRetry;
-    config instanceof Object && Object.assign(_this._config, config);
-    extend instanceof Object && Object.assign(_this._extend, extend);
     _this._factory = new _this._factory({
       request: request,
       service: (0, _assertThisInitialized2["default"])(_this)
     });
+    config instanceof Object && Object.assign(_this._config, config);
+    extend instanceof Object && Object.assign(_this._extend, extend);
 
     var _extend = _this["extends"]().middleware;
 
     _extend instanceof Object && Object.keys(_extend).forEach(function (key) {
-      _this._middleware.prototype[key] = _extend[key];
+      return _this._middleware.prototype[key] = _extend[key];
     });
-    return (0, _possibleConstructorReturn2["default"])(_this, (0, _helpers.proxy)((0, _assertThisInitialized2["default"])(_this), null, function (state, method, args) {
-      if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
-        return state[method](args[0]);
-      }
-
-      return (0, _helpers.applyCall)(new state._middleware(state), method, args);
-    }));
+    return (0, _possibleConstructorReturn2["default"])(_this, _classPrivateMethodGet((0, _assertThisInitialized2["default"])(_this), _proxy, _proxy2).call((0, _assertThisInitialized2["default"])(_this)));
   }
 
   (0, _createClass2["default"])(RequestService, [{
@@ -192,17 +195,39 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
 }(AbstractRequest);
 
 exports.RequestService = RequestService;
-var REQUEST_RESOLVE_METHODS = ['then', 'catch', 'finally', 'success', 'error'];
-exports.REQUEST_RESOLVE_METHODS = REQUEST_RESOLVE_METHODS;
+
+function _proxy2() {
+  return (0, _helpers.proxy)(this, null, function (state, method, args) {
+    if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
+      return state[method](args[0]);
+    }
+
+    return (0, _helpers.applyCall)(new state._middleware(state), method, args);
+  });
+}
+
+var _methods = /*#__PURE__*/new WeakMap();
+
+var _resolveMethods = /*#__PURE__*/new WeakMap();
 
 var Request = /*#__PURE__*/function () {
   function Request(data) {
     (0, _classCallCheck2["default"])(this, Request);
     (0, _defineProperty2["default"])(this, "data", {});
     (0, _defineProperty2["default"])(this, "chain", []);
-    (0, _defineProperty2["default"])(this, "_methods", ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']);
     (0, _defineProperty2["default"])(this, "_fetch", void 0);
     (0, _defineProperty2["default"])(this, "_resolve", void 0);
+
+    _methods.set(this, {
+      writable: true,
+      value: ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
+    });
+
+    _resolveMethods.set(this, {
+      writable: true,
+      value: ['then', 'catch', 'finally', 'success', 'error']
+    });
+
     this.data = data;
   }
   /*
@@ -211,6 +236,19 @@ var Request = /*#__PURE__*/function () {
 
 
   (0, _createClass2["default"])(Request, [{
+    key: "methods",
+    get: function get() {
+      return (0, _classPrivateFieldGet2["default"])(this, _methods).slice();
+    },
+    set: function set(name) {
+      return (0, _classPrivateFieldGet2["default"])(this, _methods).push(name);
+    }
+  }, {
+    key: "resolveMethods",
+    get: function get() {
+      return (0, _classPrivateFieldGet2["default"])(this, _resolveMethods).slice();
+    }
+  }, {
     key: "then",
     value: function then(callback) {}
     /*

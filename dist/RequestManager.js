@@ -236,14 +236,9 @@ var RequestManager = /*#__PURE__*/function () {
           return resolve(request.data.result);
         };
       });
-
-      request._methods.forEach(function (method) {
+      request.methods.forEach(function (method) {
         return request[method] instanceof Function && (request._fetch[method] = function (arg) {
-          if (_Request.REQUEST_RESOLVE_METHODS.includes(method)) {
-            arg instanceof Function || (arg = function arg() {
-              return undefined;
-            });
-          } else request[method](arg);
+          request.resolveMethods.includes(method) ? arg instanceof Function || (arg = function arg() {}) : request[method](arg);
 
           _this3._resolve.push({
             method: method,
@@ -257,7 +252,6 @@ var RequestManager = /*#__PURE__*/function () {
           return request._fetch;
         });
       });
-
       return request._fetch;
     }
   }, {

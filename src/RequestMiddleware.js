@@ -5,15 +5,17 @@ import {RequestRepository} from "./Interfaces"
 class RequestMiddleware {
 
     _staged = {}
-    _chain = []
-
     _service
     _request
 
-    _repo = null
-    _repoPath = null
-    _repoMethod = null
-    _runRepo = false
+    #repo = {
+        instance: null,
+        path: null,
+        method: null,
+        run: false,
+    }
+
+    #chain = []
 
     constructor(service, request = null) {
 
@@ -23,86 +25,85 @@ class RequestMiddleware {
         this._service = service
         this._request = request
 
-        const _proxy = (state) => proxy(state, null, (state, method, args) => {
+        return this.#proxy()
+    }
 
-            if (state._runRepo) {
-                state._runRepo = false
-                state._chain.push({method, args})
-                state._repoMethod = method
-                return applyCall(state._repo, method, args)
-            }
+    config(data) {
+        data instanceof Object && (this._staged = mergeDeep(this._staged, data))
+    }
 
-            if (['repo', 'stub'].includes(method)) {
-                state._chain.push({method, args})
-                state._repo = applyCall(state._service, method, args)
-                state._repo instanceof RequestRepository && (state._repo.client = _proxy(state))
-                state._repoPath = args[0]
-                state._runRepo = true
-                return _proxy(state)
-            }
+    #proxy() {
+
+        return proxy(this, null, (state, method, args) => {
+
+            const runRepo = state.#runRepo(method, args)
+
+            if (runRepo) return runRepo
 
             const client = state._staged.client || state._request?.data.client || state._service._config.client
 
             if (state._service._factory.getClientPrototype({client}).prototype[method] instanceof Function) {
 
-                const uri = args[0]
-                const params = args[1]
-
-                if (state._request) {
-                    state._request.chain = []
-                    state._request.data = mergeDeep(state._request.data, state._staged)
-                    Object.assign(state._request.data, {
-                        method,
-                        uri,
-                        params,
-                        repo: null,
-                        repoPath: null,
-                        repoMethod: null,
-                        statusCode: 0,
-                        dataError: null,
-                        result: null,
-                    })
-                } else {
-                    state._request = state._service._factory.create({
-                        method,
-                        uri,
-                        params,
-                        config: mergeDeep({...state._service._config}, state._staged)
-                    })
-                }
-
-                Object.assign(state._request.data, {
-                    repo: state._repo,
-                    repoPath: state._repoPath,
-                    repoMethod: state._repoMethod
-                })
-
-                const manager = new state._service._manager({
-                    request: state._request,
-                    service: state._service
-                })
-
-                state._chain.push({method, args})
-                state._request.chain = state._chain
-                state._request._fetch || manager.save()
-
-                manager.send()
-                return manager.fetch()
-
+                return this.#runManager(method, args)
             }
 
             if (state[method] instanceof Function) {
-                state._chain.push({method, args})
+
+                state.#chain.push({method, args})
+
                 applyCall(state, method, args)
-                return _proxy(state)
+
+                return state.#proxy()
             }
         })
-
-        return _proxy(this)
     }
 
-    config(data) {
-        data instanceof Object && (this._staged = mergeDeep(this._staged, data))
+    #runRepo(method, args) {
+
+        if (this.#repo.run) {
+            this.#repo.run = false
+            this.#repo.method = method
+            this.#chain.push({method, args})
+            return applyCall(this.#repo.instance, method, args)
+        }
+
+        if (['repo', 'stub'].includes(method)) {
+            this.#chain.push({method, args})
+            this.#repo.instance = applyCall(this._service, method, args)
+            this.#repo.instance instanceof RequestRepository && (this.#repo.instance.client = this.#proxy())
+            this.#repo.path = args[0]
+            this.#repo.run = true
+            return this.#proxy()
+        }
+    }
+
+    #runManager(method, args) {
+
+        this._request = this._service._factory.createOrAssign(this._request, {
+            ...this._staged,
+            uri: args[0],
+            params: args[1],
+            method
+        }, mergeDeep({...this._service._config}, this._staged))
+
+        Object.assign(this._request.data, {
+            repo: this.#repo.instance,
+            repoPath: this.#repo.path,
+            repoMethod: this.#repo.method
+        })
+
+        const manager = new this._service._manager({
+            request: this._request,
+            service: this._service
+        })
+
+        this.#chain.push({method, args})
+        this._request.chain = this.#chain
+        this._request._fetch || manager.save()
+
+        manager.send()
+
+        return manager.fetch()
     }
 }
 
