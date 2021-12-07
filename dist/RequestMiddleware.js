@@ -86,8 +86,6 @@ var RequestMiddleware = /*#__PURE__*/function () {
 exports.RequestMiddleware = RequestMiddleware;
 
 function _proxy2() {
-  var _this = this;
-
   return (0, _helpers.proxy)(this, null, function (state, method, args) {
     var _state$_request;
 
@@ -99,7 +97,7 @@ function _proxy2() {
     if (state._service._factory.getClientPrototype({
       client: client
     }).prototype[method] instanceof Function) {
-      return _classPrivateMethodGet(_this, _runManager, _runManager2).call(_this, method, args);
+      return _classPrivateMethodGet(state, _runManager, _runManager2).call(state, method, args);
     }
 
     if (state[method] instanceof Function) {

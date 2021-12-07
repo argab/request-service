@@ -44,7 +44,7 @@ class RequestMiddleware {
 
             if (state._service._factory.getClientPrototype({client}).prototype[method] instanceof Function) {
 
-                return this.#runManager(method, args)
+                return state.#runManager(method, args)
             }
 
             if (state[method] instanceof Function) {
