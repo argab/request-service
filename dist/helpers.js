@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.proxy = exports.mergeDeep = exports.isPrototype = exports.applyCall = void 0;
+exports.applyCall = exports.isPrototype = exports.proxy = exports.mergeDeep = void 0;
 
 var mergeDeep = function mergeDeep(target, source) {
   var isObject = function isObject(obj) {
