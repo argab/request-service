@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AbstractRequest = exports.Request = exports.RequestService = void 0;
+exports.RequestService = exports.Request = exports.AbstractRequest = void 0;
 
 var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
 
@@ -35,6 +35,8 @@ var _RequestRetry = require("./RequestRetry");
 
 var _helpers = require("./helpers");
 
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -42,6 +44,10 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
@@ -132,7 +138,7 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
 
-    _proxy.add((0, _assertThisInitialized2["default"])(_this));
+    _classPrivateMethodInitSpec((0, _assertThisInitialized2["default"])(_this), _proxy);
 
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
       return null;
@@ -218,12 +224,12 @@ var Request = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "_fetch", void 0);
     (0, _defineProperty2["default"])(this, "_resolve", void 0);
 
-    _methods.set(this, {
+    _classPrivateFieldInitSpec(this, _methods, {
       writable: true,
       value: ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
     });
 
-    _resolveMethods.set(this, {
+    _classPrivateFieldInitSpec(this, _resolveMethods, {
       writable: true,
       value: ['then', 'catch', 'finally', 'success', 'error']
     });

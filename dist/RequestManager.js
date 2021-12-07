@@ -133,8 +133,8 @@ var RequestManager = /*#__PURE__*/function () {
                   }, 100);
                 });
                 (_getLoader = getLoader()) === null || _getLoader === void 0 ? void 0 : _getLoader.start();
-                promise.then(function (response) {
-                  (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
+                promise.then( /*#__PURE__*/function () {
+                  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(response) {
                     return _regenerator["default"].wrap(function _callee2$(_context2) {
                       while (1) {
                         switch (_context2.prev = _context2.next) {
@@ -155,9 +155,13 @@ var RequestManager = /*#__PURE__*/function () {
                         }
                       }
                     }, _callee2);
-                  }))();
-                })["catch"](function (error) {
-                  (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
+                  }));
+
+                  return function (_x) {
+                    return _ref2.apply(this, arguments);
+                  };
+                }())["catch"]( /*#__PURE__*/function () {
+                  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(error) {
                     return _regenerator["default"].wrap(function _callee3$(_context3) {
                       while (1) {
                         switch (_context3.prev = _context3.next) {
@@ -168,7 +172,7 @@ var RequestManager = /*#__PURE__*/function () {
                             return _this2.handleError(error, handlers);
 
                           case 3:
-                            data.statusCode || _this2.setStatusCode((error === null || error === void 0 ? void 0 : error.response) || error, 500);
+                            data.statusCode || _this2.setStatusCode(error, 500);
 
                           case 4:
                           case "end":
@@ -176,33 +180,35 @@ var RequestManager = /*#__PURE__*/function () {
                         }
                       }
                     }, _callee3);
-                  }))();
-                })["finally"](function () {
-                  (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4() {
-                    var _getLoader2;
+                  }));
 
-                    var retry;
-                    return _regenerator["default"].wrap(function _callee4$(_context4) {
-                      while (1) {
-                        switch (_context4.prev = _context4.next) {
-                          case 0:
-                            (_getLoader2 = getLoader()) === null || _getLoader2 === void 0 ? void 0 : _getLoader2.end();
-                            _context4.next = 3;
-                            return _this2.onFinally(handlers);
+                  return function (_x2) {
+                    return _ref3.apply(this, arguments);
+                  };
+                }())["finally"]( /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4() {
+                  var _getLoader2;
 
-                          case 3:
-                            data.statusCode || _this2.setStatusCode(null, 200);
-                            retry = _this2._retry instanceof Function ? _this2._retry() : _this2.retry();
-                            retry === false && _this2._request._resolve();
+                  var retry;
+                  return _regenerator["default"].wrap(function _callee4$(_context4) {
+                    while (1) {
+                      switch (_context4.prev = _context4.next) {
+                        case 0:
+                          (_getLoader2 = getLoader()) === null || _getLoader2 === void 0 ? void 0 : _getLoader2.end();
+                          _context4.next = 3;
+                          return _this2.onFinally(handlers);
 
-                          case 6:
-                          case "end":
-                            return _context4.stop();
-                        }
+                        case 3:
+                          data.statusCode || _this2.setStatusCode(null, 200);
+                          retry = _this2._retry instanceof Function ? _this2._retry() : _this2.retry();
+                          retry === false && _this2._request._resolve();
+
+                        case 6:
+                        case "end":
+                          return _context4.stop();
                       }
-                    }, _callee4);
-                  }))();
-                });
+                    }
+                  }, _callee4);
+                })));
 
               case 10:
               case "end":
@@ -256,8 +262,8 @@ var RequestManager = /*#__PURE__*/function () {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                return _context8.abrupt("return", new Promise(function (resolve) {
-                  (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
+                return _context8.abrupt("return", new Promise( /*#__PURE__*/function () {
+                  var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(resolve) {
                     var source, result, fetch;
                     return _regenerator["default"].wrap(function _callee7$(_context7) {
                       while (1) {
@@ -321,8 +327,12 @@ var RequestManager = /*#__PURE__*/function () {
                         }
                       }
                     }, _callee7);
-                  }))();
-                }));
+                  }));
+
+                  return function (_x6) {
+                    return _ref5.apply(this, arguments);
+                  };
+                }()));
 
               case 1:
               case "end":
@@ -332,7 +342,7 @@ var RequestManager = /*#__PURE__*/function () {
         }, _callee8);
       }));
 
-      function resolveHandlers(_x, _x2, _x3) {
+      function resolveHandlers(_x3, _x4, _x5) {
         return _resolveHandlers.apply(this, arguments);
       }
 
@@ -343,8 +353,8 @@ var RequestManager = /*#__PURE__*/function () {
     value: function resolveRequest(methods, data, handlers) {
       var _this4 = this;
 
-      return new Promise(function (resolve) {
-        (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10() {
+      return new Promise( /*#__PURE__*/function () {
+        var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(resolve) {
           var source, fetch;
           return _regenerator["default"].wrap(function _callee10$(_context10) {
             while (1) {
@@ -410,7 +420,7 @@ var RequestManager = /*#__PURE__*/function () {
                       }, _callee9, null, [[2, 9]]);
                     }));
 
-                    return function fetch(_x4) {
+                    return function fetch(_x8) {
                       return _ref8.apply(this, arguments);
                     };
                   }();
@@ -424,16 +434,20 @@ var RequestManager = /*#__PURE__*/function () {
               }
             }
           }, _callee10);
-        }))();
-      });
+        }));
+
+        return function (_x7) {
+          return _ref7.apply(this, arguments);
+        };
+      }());
     }
   }, {
     key: "handleError",
     value: function handleError(error, handlers) {
       var _this5 = this;
 
-      return new Promise(function (resolve) {
-        (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12() {
+      return new Promise( /*#__PURE__*/function () {
+        var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12(resolve) {
           var onCatch, fetch;
           return _regenerator["default"].wrap(function _callee12$(_context12) {
             while (1) {
@@ -518,7 +532,7 @@ var RequestManager = /*#__PURE__*/function () {
                       }, _callee11, null, [[2, 10]]);
                     }));
 
-                    return function fetch(_x5) {
+                    return function fetch(_x10) {
                       return _ref10.apply(this, arguments);
                     };
                   }();
@@ -532,8 +546,12 @@ var RequestManager = /*#__PURE__*/function () {
               }
             }
           }, _callee12);
-        }))();
-      });
+        }));
+
+        return function (_x9) {
+          return _ref9.apply(this, arguments);
+        };
+      }());
     }
   }, {
     key: "setError",
@@ -636,7 +654,7 @@ var RequestManager = /*#__PURE__*/function () {
         }, _callee13, this);
       }));
 
-      function onResponse(_x6, _x7) {
+      function onResponse(_x11, _x12) {
         return _onResponse.apply(this, arguments);
       }
 
@@ -679,7 +697,7 @@ var RequestManager = /*#__PURE__*/function () {
         }, _callee14, this);
       }));
 
-      function onFinally(_x8) {
+      function onFinally(_x13) {
         return _onFinally.apply(this, arguments);
       }
 
@@ -727,7 +745,7 @@ var RequestManager = /*#__PURE__*/function () {
         }, _callee15, this);
       }));
 
-      function setResult(_x9) {
+      function setResult(_x14) {
         return _setResult.apply(this, arguments);
       }
 

@@ -25,6 +25,12 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
 var _repo = /*#__PURE__*/new WeakMap();
@@ -42,17 +48,17 @@ var RequestMiddleware = /*#__PURE__*/function () {
     var request = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     (0, _classCallCheck2["default"])(this, RequestMiddleware);
 
-    _runManager.add(this);
+    _classPrivateMethodInitSpec(this, _runManager);
 
-    _runRepo.add(this);
+    _classPrivateMethodInitSpec(this, _runRepo);
 
-    _proxy.add(this);
+    _classPrivateMethodInitSpec(this, _proxy);
 
     (0, _defineProperty2["default"])(this, "_staged", {});
     (0, _defineProperty2["default"])(this, "_service", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
 
-    _repo.set(this, {
+    _classPrivateFieldInitSpec(this, _repo, {
       writable: true,
       value: {
         instance: null,
@@ -62,7 +68,7 @@ var RequestMiddleware = /*#__PURE__*/function () {
       }
     });
 
-    _chain.set(this, {
+    _classPrivateFieldInitSpec(this, _chain, {
       writable: true,
       value: []
     });
