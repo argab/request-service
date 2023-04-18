@@ -1,48 +1,30 @@
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AbstractRequest = exports.Request = exports.RequestService = void 0;
-
+exports.RequestService = exports.Request = exports.AbstractRequest = void 0;
 var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
-
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
-
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
 var _RequestFactory = require("./RequestFactory");
-
 var _RequestMiddleware = require("./RequestMiddleware");
-
 var _Decorators = require("./Decorators");
-
 var _RequestManager = require("./RequestManager");
-
 var _RequestRetry = require("./RequestRetry");
-
 var _helpers = require("./helpers");
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
-
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
 var AbstractRequest = /*#__PURE__*/function () {
   function AbstractRequest() {
     (0, _classCallCheck2["default"])(this, AbstractRequest);
@@ -85,7 +67,6 @@ var AbstractRequest = /*#__PURE__*/function () {
       request: null
     });
   }
-
   (0, _createClass2["default"])(AbstractRequest, [{
     key: "repo",
     value: function repo() {}
@@ -104,27 +85,22 @@ var AbstractRequest = /*#__PURE__*/function () {
   }]);
   return AbstractRequest;
 }();
-
 exports.AbstractRequest = AbstractRequest;
-
 var RequestService = /*#__PURE__*/function (_AbstractRequest) {
   (0, _inherits2["default"])(RequestService, _AbstractRequest);
-
   var _super = _createSuper(RequestService);
-
   function RequestService(_ref) {
     var _this;
-
     var config = _ref.config,
-        getRepo = _ref.getRepo,
-        getStub = _ref.getStub,
-        useStubs = _ref.useStubs,
-        extend = _ref.extend,
-        factory = _ref.factory,
-        manager = _ref.manager,
-        middleware = _ref.middleware,
-        request = _ref.request,
-        requestRetry = _ref.requestRetry;
+      getRepo = _ref.getRepo,
+      getStub = _ref.getStub,
+      useStubs = _ref.useStubs,
+      extend = _ref.extend,
+      factory = _ref.factory,
+      manager = _ref.manager,
+      middleware = _ref.middleware,
+      request = _ref.request,
+      requestRetry = _ref.requestRetry;
     (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
@@ -144,15 +120,12 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     });
     config instanceof Object && Object.assign(_this._config, config);
     extend instanceof Object && Object.assign(_this._extend, extend);
-
     var _extend = _this["extends"]().middleware;
-
     _extend instanceof Object && Object.keys(_extend).forEach(function (key) {
       return _this._middleware.prototype[key] = _extend[key];
     });
     return (0, _possibleConstructorReturn2["default"])(_this, _this.proxy);
   }
-
   (0, _createClass2["default"])(RequestService, [{
     key: "repo",
     value: function repo(path) {
@@ -160,7 +133,6 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         var stub = this.stub(path);
         if (stub) return stub;
       }
-
       return this._getRepo(path);
     }
   }, {
@@ -190,20 +162,15 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
           return state[method](args[0]);
         }
-
         return (0, _helpers.applyCall)(new state._middleware(state), method, args);
       });
     }
   }]);
   return RequestService;
 }(AbstractRequest);
-
 exports.RequestService = RequestService;
-
 var _methods = /*#__PURE__*/new WeakMap();
-
 var _resolveMethods = /*#__PURE__*/new WeakMap();
-
 var Request = /*#__PURE__*/function () {
   function Request(data) {
     (0, _classCallCheck2["default"])(this, Request);
@@ -211,24 +178,20 @@ var Request = /*#__PURE__*/function () {
     (0, _defineProperty2["default"])(this, "chain", []);
     (0, _defineProperty2["default"])(this, "_fetch", void 0);
     (0, _defineProperty2["default"])(this, "_resolve", void 0);
-
-    _methods.set(this, {
+    _classPrivateFieldInitSpec(this, _methods, {
       writable: true,
       value: ['then', 'catch', 'finally', 'success', 'error', 'retry', 'retryOnCatch', 'retryChain', 'retryMaxCount', 'retryTimeout']
     });
-
-    _resolveMethods.set(this, {
+    _classPrivateFieldInitSpec(this, _resolveMethods, {
       writable: true,
       value: ['then', 'catch', 'finally', 'success', 'error']
     });
-
     this.data = data;
   }
+
   /*
   * Method is Abstract.
   * */
-
-
   (0, _createClass2["default"])(Request, [{
     key: "methods",
     get: function get() {
@@ -245,34 +208,35 @@ var Request = /*#__PURE__*/function () {
   }, {
     key: "then",
     value: function then(callback) {}
+
     /*
     * Method is Abstract.
     * */
-
   }, {
     key: "catch",
     value: function _catch(callback) {}
+
     /*
     * Method is Abstract.
     * */
-
   }, {
     key: "finally",
     value: function _finally(callback) {}
+
     /*
     * Method is Abstract.
     * */
-
   }, {
     key: "success",
     value: function success(callback) {}
+
     /*
     * Method is Abstract.
     * */
-
   }, {
     key: "error",
     value: function error(callback) {}
+
     /*
     * This method doesn't restarts the request, it brings the Function that
     * takes the request data as an argument and initiates the request restarting method.
@@ -281,12 +245,12 @@ var Request = /*#__PURE__*/function () {
     * returning Boolean that whenever is TRUE then restarts the request
     * @return: void
     * */
-
   }, {
     key: "retry",
     value: function retry(resolve) {
       this.data.retry = resolve;
     }
+
     /*
     * The request retry error handler.
     * The Function executes at the end of a Promise.prototype.finally()
@@ -294,12 +258,12 @@ var Request = /*#__PURE__*/function () {
     * returning Boolean that whenever is TRUE then restarts the request
     * @return: void
     * */
-
   }, {
     key: "retryOnCatch",
     value: function retryOnCatch(resolve) {
       this.data.retryOnCatch = resolve;
     }
+
     /*
     * Overrides the current request`s methods call chain on retry.
     * The Function executes within a retry method.
@@ -315,29 +279,28 @@ var Request = /*#__PURE__*/function () {
     *     - @property "data" - current request`s data.
     * @return: void
     * */
-
   }, {
     key: "retryChain",
     value: function retryChain(callback) {
       this.data.retryChain = callback;
     }
+
     /*
     * Sets a max number of retry attempts
     * @param: {Number}
     * @return: void
     * */
-
   }, {
     key: "retryMaxCount",
     value: function retryMaxCount(count) {
       this.data.retryMaxCount = Number.isNaN(+count) ? 0 : +count;
     }
+
     /*
     * Sets the timeout between retry attempts
     * @param: {Number}
     * @return: void
     * */
-
   }, {
     key: "retryTimeout",
     value: function retryTimeout(miliseconds) {
@@ -346,5 +309,4 @@ var Request = /*#__PURE__*/function () {
   }]);
   return Request;
 }();
-
 exports.Request = Request;

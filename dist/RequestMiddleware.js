@@ -1,58 +1,39 @@
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.RequestMiddleware = void 0;
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
 var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
-
 var _helpers = require("./helpers");
-
 var _Request = require("./Request");
-
 var _Interfaces = require("./Interfaces");
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
-
 var _repo = /*#__PURE__*/new WeakMap();
-
 var _chain = /*#__PURE__*/new WeakMap();
-
 var _proxy = /*#__PURE__*/new WeakSet();
-
 var _runRepo = /*#__PURE__*/new WeakSet();
-
 var _runManager = /*#__PURE__*/new WeakSet();
-
 var RequestMiddleware = /*#__PURE__*/function () {
   function RequestMiddleware(service) {
     var request = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     (0, _classCallCheck2["default"])(this, RequestMiddleware);
-
-    _runManager.add(this);
-
-    _runRepo.add(this);
-
-    _proxy.add(this);
-
+    _classPrivateMethodInitSpec(this, _runManager);
+    _classPrivateMethodInitSpec(this, _runRepo);
+    _classPrivateMethodInitSpec(this, _proxy);
     (0, _defineProperty2["default"])(this, "_staged", {});
     (0, _defineProperty2["default"])(this, "_service", void 0);
     (0, _defineProperty2["default"])(this, "_request", void 0);
-
-    _repo.set(this, {
+    _classPrivateFieldInitSpec(this, _repo, {
       writable: true,
       value: {
         instance: null,
@@ -61,19 +42,16 @@ var RequestMiddleware = /*#__PURE__*/function () {
         run: false
       }
     });
-
-    _chain.set(this, {
+    _classPrivateFieldInitSpec(this, _chain, {
       writable: true,
       value: []
     });
-
     if (!(service instanceof _Request.RequestService)) throw 'The RequestMiddleware`s "service" is not an instance of "RequestService".';
     if (request && !(request instanceof _Request.Request)) throw 'The RequestMiddleware`s "request" is not an instance of "Request".';
     this._service = service;
     this._request = request;
     return _classPrivateMethodGet(this, _proxy, _proxy2).call(this);
   }
-
   (0, _createClass2["default"])(RequestMiddleware, [{
     key: "config",
     value: function config(data) {
@@ -82,24 +60,18 @@ var RequestMiddleware = /*#__PURE__*/function () {
   }]);
   return RequestMiddleware;
 }();
-
 exports.RequestMiddleware = RequestMiddleware;
-
 function _proxy2() {
   return (0, _helpers.proxy)(this, null, function (state, method, args) {
     var _state$_request;
-
     var runRepo = _classPrivateMethodGet(state, _runRepo, _runRepo2).call(state, method, args);
-
     if (runRepo) return runRepo;
     var client = state._staged.client || ((_state$_request = state._request) === null || _state$_request === void 0 ? void 0 : _state$_request.data.client) || state._service._config.client;
-
     if (state._service._factory.getClientPrototype({
       client: client
     }).prototype[method] instanceof Function) {
       return _classPrivateMethodGet(state, _runManager, _runManager2).call(state, method, args);
     }
-
     if (state[method] instanceof Function) {
       (0, _classPrivateFieldGet2["default"])(state, _chain).push({
         method: method,
@@ -110,7 +82,6 @@ function _proxy2() {
     }
   });
 }
-
 function _runRepo2(method, args) {
   if ((0, _classPrivateFieldGet2["default"])(this, _repo).run) {
     (0, _classPrivateFieldGet2["default"])(this, _repo).run = false;
@@ -121,7 +92,6 @@ function _runRepo2(method, args) {
     });
     return (0, _helpers.applyCall)((0, _classPrivateFieldGet2["default"])(this, _repo).instance, method, args);
   }
-
   if (['repo', 'stub'].includes(method)) {
     (0, _classPrivateFieldGet2["default"])(this, _chain).push({
       method: method,
@@ -134,7 +104,6 @@ function _runRepo2(method, args) {
     return _classPrivateMethodGet(this, _proxy, _proxy2).call(this);
   }
 }
-
 function _runManager2(method, args) {
   this._request = this._service._factory.createOrAssign(this._request, _objectSpread(_objectSpread({}, this._staged), {}, {
     uri: args[0],
