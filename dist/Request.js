@@ -43,8 +43,6 @@ function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflec
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
-
 var AbstractRequest = /*#__PURE__*/function () {
   function AbstractRequest() {
     (0, _classCallCheck2["default"])(this, AbstractRequest);
@@ -109,8 +107,6 @@ var AbstractRequest = /*#__PURE__*/function () {
 
 exports.AbstractRequest = AbstractRequest;
 
-var _proxy = /*#__PURE__*/new WeakSet();
-
 var RequestService = /*#__PURE__*/function (_AbstractRequest) {
   (0, _inherits2["default"])(RequestService, _AbstractRequest);
 
@@ -131,9 +127,6 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
         requestRetry = _ref.requestRetry;
     (0, _classCallCheck2["default"])(this, RequestService);
     _this = _super.call(this);
-
-    _proxy.add((0, _assertThisInitialized2["default"])(_this));
-
     _this._getRepo = getRepo instanceof Function ? getRepo : function () {
       return null;
     };
@@ -157,7 +150,7 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     _extend instanceof Object && Object.keys(_extend).forEach(function (key) {
       return _this._middleware.prototype[key] = _extend[key];
     });
-    return (0, _possibleConstructorReturn2["default"])(_this, _classPrivateMethodGet((0, _assertThisInitialized2["default"])(_this), _proxy, _proxy2).call((0, _assertThisInitialized2["default"])(_this)));
+    return (0, _possibleConstructorReturn2["default"])(_this, _this.proxy);
   }
 
   (0, _createClass2["default"])(RequestService, [{
@@ -190,21 +183,22 @@ var RequestService = /*#__PURE__*/function (_AbstractRequest) {
     value: function _extends() {
       return _objectSpread({}, this._extend);
     }
+  }, {
+    key: "proxy",
+    get: function get() {
+      return (0, _helpers.proxy)(this, null, function (state, method, args) {
+        if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
+          return state[method](args[0]);
+        }
+
+        return (0, _helpers.applyCall)(new state._middleware(state), method, args);
+      });
+    }
   }]);
   return RequestService;
 }(AbstractRequest);
 
 exports.RequestService = RequestService;
-
-function _proxy2() {
-  return (0, _helpers.proxy)(this, null, function (state, method, args) {
-    if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
-      return state[method](args[0]);
-    }
-
-    return (0, _helpers.applyCall)(new state._middleware(state), method, args);
-  });
-}
 
 var _methods = /*#__PURE__*/new WeakMap();
 

@@ -85,7 +85,7 @@ class RequestService extends AbstractRequest {
         const _extend = this.extends().middleware
         _extend instanceof Object && Object.keys(_extend).forEach(key => this._middleware.prototype[key] = _extend[key])
 
-        return this.#proxy()
+        return this.proxy
     }
 
     repo(path) {
@@ -112,7 +112,7 @@ class RequestService extends AbstractRequest {
         return {...this._extend}
     }
 
-    #proxy() {
+    get proxy() {
         return proxy(this, null, (state, method, args) => {
             if (false === ['repo', 'stub'].includes(method) && state[method] instanceof Function) {
                 return state[method](args[0])
