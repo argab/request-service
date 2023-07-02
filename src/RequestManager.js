@@ -82,7 +82,9 @@ class RequestManager {
 
         if (request._fetch instanceof Promise) return request._fetch
 
-        request._fetch = new Promise(resolve => request._resolve = () => resolve(request.data.result))
+        request._fetch = new Promise(resolve => request._resolve = () => {
+            return resolve(request.data.result)
+        })
 
         request.methods.forEach(method => request[method] instanceof Function && (request._fetch[method] = (arg) => {
 
@@ -209,7 +211,11 @@ class RequestManager {
     }
 
     async setResult(result) {
-        result === undefined || (this._request.data.result = result instanceof Promise ? await result : result)
+        if (result === undefined) return
+
+        const data = await result
+
+        if (data !== undefined) this._request.data.result = data
     }
 
     setStatusCode(source, def) {

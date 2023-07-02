@@ -556,29 +556,22 @@ var RequestManager = /*#__PURE__*/function () {
     key: "setResult",
     value: function () {
       var _setResult = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee15(result) {
+        var data;
         return _regenerator["default"].wrap(function _callee15$(_context15) {
           while (1) switch (_context15.prev = _context15.next) {
             case 0:
-              _context15.t0 = result === undefined;
-              if (_context15.t0) {
-                _context15.next = 10;
+              if (!(result === undefined)) {
+                _context15.next = 2;
                 break;
               }
-              if (!(result instanceof Promise)) {
-                _context15.next = 8;
-                break;
-              }
-              _context15.next = 5;
+              return _context15.abrupt("return");
+            case 2:
+              _context15.next = 4;
               return result;
-            case 5:
-              _context15.t1 = _context15.sent;
-              _context15.next = 9;
-              break;
-            case 8:
-              _context15.t1 = result;
-            case 9:
-              this._request.data.result = _context15.t1;
-            case 10:
+            case 4:
+              data = _context15.sent;
+              if (data !== undefined) this._request.data.result = data;
+            case 6:
             case "end":
               return _context15.stop();
           }

@@ -119,6 +119,7 @@ class App {
     getPosts() {
         return this.request.unlog().get('/posts').then(response => {
             console.log('posts: ',  JSON.stringify(response.data))
+            return response.data
         }).catch(err => console.error(err))
     }
 
@@ -191,21 +192,24 @@ const app = new App();
 
 (async () => {
 
+    let result;
+    let log = [];
+
     // await app.request.get('/posts').error(r => {}).then(response => {
     //     console.log('simple posts: ',  JSON.stringify(response.data))
     // }).catch(err => console.error(err))
     //
     // await app.getPosts()
 
-    await app.getPostsRepo(1, 2, 3, 4, 5).then(r => {
-
-        console.log('GET POSTS REPO RESPONSE: ', r)
-
-    })
+    // await app.getPostsRepo(1, 2, 3, 4, 5).then(r => {
+    //
+    //     console.log('GET POSTS REPO RESPONSE: ', r)
+    //
+    // })
 
     // await app.getCommentsStub()
     //
-    // let result = await app.request.html()
+    // result = await app.request.html()
     //     .awesome()
     //     .get('/posts')
     //     .success(() => { throw 'Oooooops!' })
@@ -232,7 +236,7 @@ const app = new App();
     //
     // console.error('RESULTS: ', result)
     // // //
-    // const log = app.request.getLog()
+    // log = app.request.getLog()
     // console.log('requests logged number: ', log.length)
     //
     // result = await app.request
@@ -267,9 +271,22 @@ const app = new App();
     //     .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
     //     .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
     //     .finally((data) => data)
-    //
-    // console.error('RESULT: ', result)
-    //
+
+    // result =
+    //   await app.request
+    //     .repo('posts')
+    //     .getPosts()
+    //     .then(() => {throw 'testing errors.'})
+    //     .then(() => new Promise(res => setTimeout(() => {console.log('then1'); res(1)}, 3000)))
+    //     .then((data) => new Promise(res => setTimeout(() => {console.log('then2', data); res()}, 3000)))
+    //     .catch(() => new Promise(res => setTimeout(() => {console.log('catch1'); res(2)}, 1000)))
+    //     .catch()
+    //     .catch((data) => new Promise(res => setTimeout(() => {console.log('catch2', data); res()}, 1000)))
+    //     .finally(() => new Promise(res => setTimeout(() => {console.log('finally1'); res(3)}, 1000)))
+    //     .finally((data) => data)
+
+    console.error('RESULT: ', result)
+
     // console.log(log[log.length-1].data)
 
 })();
